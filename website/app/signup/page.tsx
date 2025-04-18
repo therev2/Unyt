@@ -8,14 +8,17 @@ import { useState } from "react"
 
 export default function SignupPage() {
   const router = useRouter();
+  const [registrationNumber, setRegistrationNumber] = useState("");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [degreeCollege, setDegreeCollege] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
 
   function handleSignup(e: React.FormEvent) {
     e.preventDefault();
-    if (!email || !password || !confirmPassword) {
+    if (!registrationNumber || !name || !email || !degreeCollege || !password || !confirmPassword) {
       setError("Please fill in all fields.");
       return;
     }
@@ -37,11 +40,32 @@ export default function SignupPage() {
         <CardContent>
           <form className="flex flex-col gap-4" onSubmit={handleSignup}>
             <Input
+              type="text"
+              placeholder="Name"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              autoFocus
+              required
+            />
+            <Input
               type="email"
               placeholder="Email"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              autoFocus
+              required
+            />
+            <Input
+              type="text"
+              placeholder="Registration Number"
+              value={registrationNumber}
+              onChange={e => setRegistrationNumber(e.target.value)}
+              required
+            />
+            <Input
+              type="text"
+              placeholder="Degree College"
+              value={degreeCollege}
+              onChange={e => setDegreeCollege(e.target.value)}
               required
             />
             <Input

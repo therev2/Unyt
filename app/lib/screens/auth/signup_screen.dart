@@ -17,6 +17,8 @@ class _SignupScreenState extends State<SignupScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _regNoController=TextEditingController();
+  final _collegeController=TextEditingController();
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -68,6 +70,8 @@ class _SignupScreenState extends State<SignupScreen> {
         _usernameController.text.trim(),
         _emailController.text.trim(),
         _passwordController.text,
+        _collegeController.text.trim(),
+        _regNoController.text.trim(),
       );
       if (error == null && mounted) {
         Navigator.pushReplacementNamed(context, '/main');
@@ -172,7 +176,42 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
 
                       const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _collegeController,
+                        keyboardType: TextInputType.text,
+                        decoration: const InputDecoration(
+                          labelText: 'College',
+                          hintText: 'Enter your college',
+                          prefixIcon: Icon(Icons.school_outlined),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter your college';
+                          }
+                          return null;
+                        },
+                        textInputAction: TextInputAction.next,
+                      ),
 
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _regNoController,
+                        keyboardType: TextInputType.text,
+                        decoration: const InputDecoration(
+                          labelText: 'Registration Number',
+                          hintText: 'Enter your registration number',
+                          prefixIcon: Icon(Icons.confirmation_number_outlined),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter your registration number';
+                          }
+                          return null;
+                        },
+                        textInputAction: TextInputAction.next,
+                      ),
+
+                      const SizedBox(height: 16),
                       // Password Field
                       TextFormField(
                         controller: _passwordController,

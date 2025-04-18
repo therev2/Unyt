@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AuthProvider extends ChangeNotifier {
   bool _isAuthenticated = false;
@@ -11,6 +12,7 @@ class AuthProvider extends ChangeNotifier {
 
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   bool get isAuthenticated => _isAuthenticated;
   String? get token => _token;
@@ -39,29 +41,67 @@ class AuthProvider extends ChangeNotifier {
       return false;
     }
   }
-Future<String?> register(String username, String email, String password) async {
-  try {
-    final UserCredential userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-    final user = userCredential.user;
-    if (user != null) {
-      await user.updateDisplayName(username);
-      _isAuthenticated = true;
-      _token = await user.getIdToken();
-      _userId = user.uid;
-      _username = username;
-      _email = email;
-      notifyListeners();
-      return null; // null means success
+
+  Future<String?> register(String username, String email, String password, String college, String regNo) async {
+    try {
+      // Use lowercase for matching and storing
+      final String collegeName = college.trim();
+      final String collegeNameLower = collegeName.toLowerCase();
+
+      // 1. Check if college exists (case-insensitive by storing a lowercased field)
+      QuerySnapshot collegeQuery = await _firestore
+        .collection('Colleges')
+        .where('name_lower', isEqualTo: collegeNameLower)
+        .get();
+
+      String collegeId;
+      if (collegeQuery.docs.isNotEmpty) {
+        // College exists
+        collegeId = collegeQuery.docs.first.id;
+        print('College exists: $collegeId');
+      } else {
+        // College does not exist, add it
+        DocumentReference newCollege = await _firestore.collection('Colleges').add({
+          'name': collegeName,
+          'name_lower': collegeNameLower, // for case-insensitive search
+        });
+        collegeId = newCollege.id;
+        print('New college added: $collegeId');
+      }
+
+      // 2. Register the user with Firebase Auth
+      final UserCredential userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      final user = userCredential.user;
+      if (user != null) {
+        await user.updateDisplayName(username);
+
+        // 3. Store user data in Students collection with collegeId
+        await _firestore.collection('Students').doc(user.uid).set({
+          'name': username,
+          'email': email,
+          'college': collegeName,
+          'regNo': regNo,
+          'collegeId': collegeId,
+        });
+        print('Student registered with collegeId: $collegeId');
+
+        _isAuthenticated = true;
+        _token = await user.getIdToken();
+        _userId = user.uid;
+        _username = username;
+        _email = email;
+        notifyListeners();
+        return null; // null means success
+      }
+      return "Unknown error";
+    } catch (e) {
+      print("Registration failed: $e");
+      return e.toString();
     }
-    return "Unknown error";
-  } catch (e) {
-    print("Registration failed: $e");
-    return e.toString();
   }
-}
 
   Future<void> logout() async {
     await _firebaseAuth.signOut();

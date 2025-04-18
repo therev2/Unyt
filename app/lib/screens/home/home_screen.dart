@@ -7,6 +7,8 @@ import 'package:unyt/models/notice.dart';
 import 'package:unyt/models/event.dart';
 import 'package:unyt/models/poll.dart';
 import 'package:unyt/models/bulletin.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,37 +20,65 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   final PageController _pageController = PageController();
+  List<Notice> notices = [];
+  bool _isLoading = true;
 
-  // Sample data - in a real app, this would come from your API
-  final List<Notice> notices = [
-    Notice(
-      id: 1,
-      title: 'Semester Registration Deadline',
-      content:
-          'All students must complete their semester registration by April 30th. Late registrations will incur a penalty fee.',
-      date: 'Apr 20, 2023',
-      author: 'Academic Office',
-      important: true,
-    ),
-    Notice(
-      id: 2,
-      title: 'Campus Wi-Fi Maintenance',
-      content:
-          'The campus Wi-Fi network will be down for maintenance on Saturday from 2 AM to 5 AM.',
-      date: 'Apr 18, 2023',
-      author: 'IT Department',
-      important: false,
-    ),
-    Notice(
-      id: 3,
-      title: 'Library Extended Hours',
-      content:
-          'The central library will remain open until midnight during the exam period (May 1-15).',
-      date: 'Apr 15, 2023',
-      author: 'Library',
-      important: false,
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    fetchNotices();
+  }
+
+  Future<void> fetchNotices() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) throw Exception('No user signed in');
+      print('Current user: ${user.uid}');
+
+      final studentDoc = await FirebaseFirestore.instance
+          .collection('Students')
+          .doc(user.uid)
+          .get();
+      print('Student doc data: ${studentDoc.data()}');
+      final collegeId = studentDoc.data()?['collegeId'];
+      if (collegeId == null) throw Exception('No collegeId found for student');
+      print('College ID: ${collegeId}');
+
+      final noticesSnapshot = await FirebaseFirestore.instance
+          .collection('Colleges')
+          .doc(collegeId)
+          .collection('Notices')
+          .get();
+      print('Number of notices fetched: ${noticesSnapshot.docs.length}');
+
+      final fetchedNotices = noticesSnapshot.docs.map((doc) {
+        final data = doc.data();
+        print('Notice data: ${data}');
+        return Notice(
+          id: data['id'] ?? 0,
+          title: data['title'] ?? '',
+          content: data['content'] ?? '',
+          date: data['date'] ?? '',
+          author: data['author'] ?? '',
+          important: data['important'] ?? false,
+        );
+      }).toList();
+
+      setState(() {
+        notices = fetchedNotices;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error fetching notices: ${e}');
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   final List<Event> events = [
     Event(
@@ -146,11 +176,6 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
@@ -230,6 +255,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildNoticesTab() {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(

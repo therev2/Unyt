@@ -1,67 +1,33 @@
+"use client"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { SidebarTrigger } from "@/components/ui/sidebar"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
-export default function Home() {
+export default function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen">
       <header className="flex h-16 items-center gap-4 border-b bg-background px-6">
-        <SidebarTrigger />
-        <div className="font-semibold">CampusConnext Dashboard</div>
-      </header>
-
-      <main className="flex-1 p-6 md:p-10">
-        <div className="mx-auto max-w-7xl">
-          <div className="flex flex-col gap-8">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Welcome to CampusConnext</h1>
-              <p className="text-muted-foreground mt-2">Bridging Colleges, Building Communities</p>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              <Card>
-                <CardHeader>
-                  <CardTitle>College Homepage</CardTitle>
-                  <CardDescription>View your college's notices, events, and polls</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-40 rounded-md bg-muted flex items-center justify-center">
-                    College Content Preview
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button className="w-full">Visit College Page</Button>
-                </CardFooter>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Global Event Feed</CardTitle>
-                  <CardDescription>Discover events from all colleges</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-40 rounded-md bg-muted flex items-center justify-center">Events Preview</div>
-                </CardContent>
-                <CardFooter>
-                  <Button className="w-full">Explore Events</Button>
-                </CardFooter>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Quizzes & Battles</CardTitle>
-                  <CardDescription>Challenge your knowledge and compete</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-40 rounded-md bg-muted flex items-center justify-center">Quizzes Preview</div>
-                </CardContent>
-                <CardFooter>
-                  <Button className="w-full">Start a Quiz</Button>
-                </CardFooter>
-              </Card>
-            </div>
-          </div>
+        <div className="flex items-center gap-2">
+          <img src="/placeholder-logo.svg?height=40&width=40" alt="CampusConnext Logo" className="h-8 w-8" />
+          <span className="text-xl font-bold tracking-tight">CampusConnext</span>
         </div>
+      </header>
+      <main className="flex-1 flex flex-col items-center justify-center px-4 py-12">
+        <Card className="w-full max-w-md shadow-xl">
+          <CardHeader>
+            <CardTitle className="text-2xl">Welcome to CampusConnext</CardTitle>
+            <CardDescription>
+              Bridging Colleges, Building Communities
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-6">
+            <Button className="w-full" variant="default" onClick={() => window.location.href = '/login'}>
+              Login
+            </Button>
+            <Button className="w-full" variant="outline" onClick={() => window.location.href = '/signup'}>
+              Sign Up
+            </Button>
+          </CardContent>
+        </Card>
       </main>
     </div>
   )

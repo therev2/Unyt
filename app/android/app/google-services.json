@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "779110394031",
+    "project_id": "unyt-a2c51",
+    "storage_bucket": "unyt-a2c51.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:779110394031:android:3edeaaaa2fe238e7b8cc5a",
+        "android_client_info": {
+          "package_name": "com.example.unyt"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "779110394031-n7729t1d5eru6rda5fau5r38ia6fn94h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCAjYqKdFyj2FQ-0JEYrnSiEqJgV_n8SSM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "779110394031-n7729t1d5eru6rda5fau5r38ia6fn94h.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "779110394031-ni53dsnjvrogbhco6oa68rfoge35r00e.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.unyt"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

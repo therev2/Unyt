@@ -5,8 +5,11 @@ import 'package:unyt/providers/theme_provider.dart';
 import 'package:unyt/screens/auth/login_screen.dart';
 import 'package:unyt/screens/main_screen.dart';
 import 'package:unyt/utils/theme_utils.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(
     MultiProvider(
       providers: [
@@ -27,7 +30,7 @@ class MyApp extends StatelessWidget {
     final authProvider = Provider.of<AuthProvider>(context);
 
     return MaterialApp(
-      title: 'CampusConnext',
+      title: 'Unyt',
       debugShowCheckedModeBanner: false,
       theme: getLightTheme(),
       darkTheme: getDarkTheme(),

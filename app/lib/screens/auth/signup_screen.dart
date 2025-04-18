@@ -64,18 +64,17 @@ class _SignupScreenState extends State<SignupScreen> {
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final success = await authProvider.register(
+      final error = await authProvider.register(
         _usernameController.text.trim(),
         _emailController.text.trim(),
         _passwordController.text,
       );
-
-      if (success && mounted) {
+      if (error == null && mounted) {
         Navigator.pushReplacementNamed(context, '/main');
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Registration failed. Please try again.'),
+          SnackBar(
+            content: Text('Registration failed: $error'),
             backgroundColor: Colors.red,
           ),
         );
@@ -120,7 +119,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Join CampusConnext',
+                      'Join Unyt',
                       style: Theme.of(context).textTheme.headlineSmall
                           ?.copyWith(fontWeight: FontWeight.bold),
                     ),

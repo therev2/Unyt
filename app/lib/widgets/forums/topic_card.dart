@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:unyt/models/forum_topic.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:unyt/screens/forums/topic_detail_screen.dart';
 
 class TopicCard extends StatelessWidget {
   final ForumTopic topic;
@@ -8,11 +11,19 @@ class TopicCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    final userId = user?.uid ?? 'guest';
+    final hasUpvoted = topic.upvotedBy.contains(userId);
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       child: InkWell(
         onTap: () {
-          // Navigate to topic detail
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => TopicDetailScreen(topic: topic),
+            ),
+          );
         },
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -22,6 +33,40 @@ class TopicCard extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Upvote column
+                  Column(
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.arrow_upward, color: hasUpvoted ? Colors.orange : null),
+                        onPressed: hasUpvoted ? null : () async {
+                          final docRef = FirebaseFirestore.instance
+                              .collection('Discussion')
+                              .doc(topic.id.toString());
+                          await docRef.update({
+                            'upvotes': FieldValue.increment(1),
+                            'upvotedBy': FieldValue.arrayUnion([userId]),
+                          });
+                        },
+                      ),
+                      Text(
+                        topic.upvotes.toString(),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.arrow_downward),
+                        onPressed: hasUpvoted ? () async {
+                          final docRef = FirebaseFirestore.instance
+                              .collection('Discussion')
+                              .doc(topic.id.toString());
+                          await docRef.update({
+                            'upvotes': FieldValue.increment(-1),
+                            'upvotedBy': FieldValue.arrayRemove([userId]),
+                          });
+                        } : null,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(width: 12),
                   CircleAvatar(
                     backgroundImage: NetworkImage(topic.author.avatar),
                     radius: 20,

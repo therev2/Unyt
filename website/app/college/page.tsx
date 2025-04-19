@@ -7,131 +7,157 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
+import { db } from "@/lib/firebase";
+import { collection, getDocs, addDoc } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import BulletinPostDialog from "@/components/bulletin-post-dialog";
 
-// Sample data - in a real app, this would come from your database
-const notices = [
-  {
-    id: 1,
-    title: "Semester Registration Deadline",
-    content:
-      "All students must complete their semester registration by April 30th. Late registrations will incur a penalty fee.",
-    date: "Apr 20, 2023",
-    author: "Academic Office",
-    important: true,
-  },
-  {
-    id: 2,
-    title: "Campus Wi-Fi Maintenance",
-    content: "The campus Wi-Fi network will be down for maintenance on Saturday from 2 AM to 5 AM.",
-    date: "Apr 18, 2023",
-    author: "IT Department",
-    important: false,
-  },
-  {
-    id: 3,
-    title: "Library Extended Hours",
-    content: "The central library will remain open until midnight during the exam period (May 1-15).",
-    date: "Apr 15, 2023",
-    author: "Library",
-    important: false,
-  },
-]
+function useFirestoreEvents(collegeId: string | undefined) {
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-const events = [
-  {
-    id: 1,
-    title: "Annual Tech Fest",
-    description: "Join us for the biggest tech festival of the year with workshops, competitions, and guest lectures.",
-    date: "May 15-17, 2023",
-    location: "Main Auditorium",
-    image: "/placeholder.svg?height=100&width=200",
-    organizer: "Technical Club",
-  },
-  {
-    id: 2,
-    title: "Career Fair 2023",
-    description: "Meet recruiters from over 50 companies. Bring your resume and dress professionally.",
-    date: "May 5, 2023",
-    location: "Convention Center",
-    image: "/placeholder.svg?height=100&width=200",
-    organizer: "Placement Cell",
-  },
-  {
-    id: 3,
-    title: "Cultural Night",
-    description: "An evening of music, dance, and drama performances by students.",
-    date: "Apr 28, 2023",
-    location: "Open Air Theater",
-    image: "/placeholder.svg?height=100&width=200",
-    organizer: "Cultural Committee",
-  },
-]
+  useEffect(() => {
+    if (!collegeId) return;
+    setLoading(true);
+    setError(null);
+    getDocs(collection(db, `Colleges/${collegeId}/Events`))
+      .then((querySnapshot) => {
+        const fetched: any[] = [];
+        querySnapshot.forEach((doc) => {
+          fetched.push({ id: doc.id, ...doc.data() });
+        });
+        setEvents(fetched);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, [collegeId]);
 
-const polls = [
-  {
-    id: 1,
-    question: "When should we schedule the department picnic?",
-    options: [
-      { id: 1, text: "Next Saturday", votes: 45 },
-      { id: 2, text: "Next Sunday", votes: 32 },
-      { id: 3, text: "The following weekend", votes: 18 },
-    ],
-    totalVotes: 95,
-    endDate: "Apr 25, 2023",
-  },
-  {
-    id: 2,
-    question: "Which guest speaker would you prefer for the technical symposium?",
-    options: [
-      { id: 1, text: "Dr. Jane Smith (AI Researcher)", votes: 78 },
-      { id: 2, text: "Mr. John Doe (Industry Expert)", votes: 64 },
-      { id: 3, text: "Prof. Alice Johnson (Academic)", votes: 42 },
-    ],
-    totalVotes: 184,
-    endDate: "Apr 30, 2023",
-  },
-]
+  return { events, loading, error };
+}
 
-const bulletins = [
-  {
-    id: 1,
-    title: "Selling Textbooks",
-    content:
-      "Selling Computer Networks and Database Management System textbooks. Both in excellent condition. Contact: 9876543210",
-    author: {
-      name: "Rahul Sharma",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    date: "Apr 19, 2023",
-  },
-  {
-    id: 2,
-    title: "Roommate Wanted",
-    content: "Looking for a roommate to share an apartment near campus. Rent: ₹8000/month. Available from May 1st.",
-    author: {
-      name: "Priya Patel",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    date: "Apr 17, 2023",
-  },
-  {
-    id: 3,
-    title: "Coding Club Recruitment",
-    content:
-      "The Coding Club is recruiting new members. If you're passionate about programming, join us! Apply by April 30th.",
-    author: {
-      name: "Coding Club",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    date: "Apr 15, 2023",
-  },
-]
+function useFirestoreBulletins(collegeId: string | undefined) {
+  const [bulletins, setBulletins] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!collegeId) return;
+    setLoading(true);
+    setError(null);
+    getDocs(collection(db, `Colleges/${collegeId}/Bulletin`))
+      .then((querySnapshot) => {
+        const fetched: any[] = [];
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          fetched.push({
+            id: data.id ?? doc.id,
+            title: data.title ?? '',
+            content: data.content ?? '',
+            date: data.date ?? '',
+            author: {
+              name: data.author_name ?? '',
+              avatar: data.author_avatar ?? '/placeholder.svg?height=40&width=40',
+            },
+          });
+        });
+        setBulletins(fetched);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, [collegeId]);
+
+  return { bulletins, loading, error };
+}
+
+function useFirestoreNotices(collegeId: string | undefined) {
+  const [notices, setNotices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!collegeId) return;
+    setLoading(true);
+    setError(null);
+    getDocs(collection(db, `Colleges/${collegeId}/Notices`))
+      .then((querySnapshot) => {
+        const fetched: any[] = [];
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          fetched.push({
+            id: data.id ?? doc.id,
+            title: data.title ?? '',
+            content: data.content ?? '',
+            date: data.date ?? '',
+            author: data.author ?? '',
+            important: data.important ?? false,
+          });
+        });
+        setNotices(fetched);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, [collegeId]);
+
+  return { notices, loading, error };
+}
+
+function useFirestorePolls(collegeId: string | undefined) {
+  const [polls, setPolls] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!collegeId) return;
+    setLoading(true);
+    setError(null);
+    getDocs(collection(db, `Colleges/${collegeId}/Polls`))
+      .then((querySnapshot) => {
+        const fetched: any[] = [];
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          fetched.push({
+            id: data.id ?? doc.id,
+            question: data.question ?? '',
+            options: Array.isArray(data.options) ? data.options : [],
+            totalVotes: data.totalVotes ?? 0,
+            endDate: data.endDate ?? '',
+            voters: data.voters ?? [],
+          });
+        });
+        setPolls(fetched);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, [collegeId]);
+
+  return { polls, loading, error };
+}
 
 import ChatRoom from "@/components/ChatRoom";
 import { useUserProfile } from "@/components/useUserProfile";
 
+const polls = []
+
 export default function CollegePage() {
-  const { userData, loading, error } = useUserProfile();
+  const { userData, loading: profileLoading, error: profileError } = useUserProfile();
+  const collegeId = userData?.collegeId || userData?.college || "NIT_Trichy"; // fallback for demo
+  const { events, loading: eventsLoading, error: eventsError } = useFirestoreEvents(collegeId);
+  const { bulletins, loading: bulletinsLoading, error: bulletinsError } = useFirestoreBulletins(collegeId);
+  const { notices, loading: noticesLoading, error: noticesError } = useFirestoreNotices(collegeId);
+  const { polls, loading: pollsLoading, error: pollsError } = useFirestorePolls(collegeId);
   return (
     <div className="flex flex-col min-h-screen">
       <header className="flex h-16 items-center gap-4 border-b bg-background px-6">
@@ -183,26 +209,32 @@ export default function CollegePage() {
                   Subscribe to Notifications
                 </Button>
               </div>
-              <div className="grid gap-6">
-                {notices.map((notice) => (
-                  <Card key={notice.id}>
-                    <CardHeader className="pb-3">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <CardTitle className="text-lg">{notice.title}</CardTitle>
-                          <CardDescription>
-                            Posted by {notice.author} • {notice.date}
-                          </CardDescription>
+              {noticesLoading ? (
+                <div>Loading notices…</div>
+              ) : noticesError ? (
+                <div className="text-red-500">Error loading notices: {noticesError}</div>
+              ) : (
+                <div className="grid gap-6">
+                  {notices.map((notice) => (
+                    <Card key={notice.id}>
+                      <CardHeader className="pb-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <CardTitle className="text-lg">{notice.title}</CardTitle>
+                            <CardDescription>
+                              Posted by {notice.author} • {notice.date}
+                            </CardDescription>
+                          </div>
+                          {notice.important && <Badge variant="destructive">Important</Badge>}
                         </div>
-                        {notice.important && <Badge variant="destructive">Important</Badge>}
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <p>{notice.content}</p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                      </CardHeader>
+                      <CardContent>
+                        <p>{notice.content}</p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </TabsContent>
 
             {/* Events Tab */}
@@ -214,30 +246,36 @@ export default function CollegePage() {
                   Add to Calendar
                 </Button>
               </div>
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {events.map((event) => (
-                  <Card key={event.id} className="overflow-hidden">
-                    <img
-                      src={event.image || "/placeholder.svg"}
-                      alt={event.title}
-                      className="w-full h-40 object-cover"
-                    />
-                    <CardHeader>
-                      <CardTitle>{event.title}</CardTitle>
-                      <CardDescription>
-                        {event.date} • {event.location}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm">{event.description}</p>
-                    </CardContent>
-                    <CardFooter className="flex justify-between">
-                      <p className="text-sm text-muted-foreground">By {event.organizer}</p>
-                      <Button size="sm">Register</Button>
-                    </CardFooter>
-                  </Card>
-                ))}
-              </div>
+              {eventsLoading ? (
+                <div>Loading events…</div>
+              ) : eventsError ? (
+                <div className="text-red-500">Error loading events: {eventsError}</div>
+              ) : (
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {events.map((event) => (
+                    <Card key={event.id} className="overflow-hidden">
+                      <img
+                        src={event.image || "/placeholder.svg"}
+                        alt={event.title}
+                        className="w-full h-40 object-cover"
+                      />
+                      <CardHeader>
+                        <CardTitle>{event.title}</CardTitle>
+                        <CardDescription>
+                          {event.date} • {event.location}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm">{event.description}</p>
+                      </CardContent>
+                      <CardFooter className="flex justify-between">
+                        <p className="text-sm text-muted-foreground">By {event.organizer}</p>
+                        <Button size="sm">Register</Button>
+                      </CardFooter>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </TabsContent>
 
             {/* Polls Tab */}
@@ -249,50 +287,56 @@ export default function CollegePage() {
                   Create Poll
                 </Button>
               </div>
-              <div className="grid gap-6">
-                {polls.map((poll) => (
-                  <Card key={poll.id}>
-                    <CardHeader>
-                      <CardTitle>{poll.question}</CardTitle>
-                      <CardDescription>
-                        {poll.totalVotes} votes • Ends on {poll.endDate}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        {poll.options.map((option) => {
-                          const percentage = Math.round((option.votes / poll.totalVotes) * 100)
-                          return (
-                            <div key={option.id} className="space-y-2">
-                              <div className="flex justify-between">
-                                <span>{option.text}</span>
-                                <span>{percentage}%</span>
+              {pollsLoading ? (
+                <div>Loading polls…</div>
+              ) : pollsError ? (
+                <div className="text-red-500">Error loading polls: {pollsError}</div>
+              ) : (
+                <div className="grid gap-6">
+                  {polls.map((poll) => (
+                    <Card key={poll.id}>
+                      <CardHeader>
+                        <CardTitle>{poll.question}</CardTitle>
+                        <CardDescription>
+                          {poll.totalVotes} votes • Ends on {poll.endDate}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {poll.options.map((option: any) => {
+                            const percentage = poll.totalVotes > 0 ? Math.round((option.votes / poll.totalVotes) * 100) : 0;
+                            return (
+                              <div key={option.id} className="space-y-2">
+                                <div className="flex justify-between">
+                                  <span>{option.text}</span>
+                                  <span>{percentage}%</span>
+                                </div>
+                                <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
+                                  <div className="h-full bg-primary" style={{ width: `${percentage}%` }} />
+                                </div>
                               </div>
-                              <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
-                                <div className="h-full bg-primary" style={{ width: `${percentage}%` }} />
-                              </div>
-                            </div>
-                          )
-                        })}
-                      </div>
-                    </CardContent>
-                    <CardFooter>
-                      <Button className="w-full">Vote Now</Button>
-                    </CardFooter>
-                  </Card>
-                ))}
-              </div>
+                            );
+                          })}
+                        </div>
+                      </CardContent>
+                      <CardFooter>
+                        <Button className="w-full">Vote Now</Button>
+                      </CardFooter>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </TabsContent>
 
             {/* Chatroom Tab */}
             <TabsContent value="chatroom" className="mt-6">
-              {loading ? (
+              {profileLoading ? (
                 <div>Loading chatroom…</div>
-              ) : error || !userData?.college ? (
+              ) : profileError || !userData?.college ? (
                 <div className="text-red-500 text-sm">
                   Unable to load college chatroom<br />
                   College value: {userData?.college || "undefined"}<br />
-                  Error: {error}
+                  Error: {profileError}
                 </div>
               ) : (
                 <ChatRoom roomId={userData.college} />
@@ -303,47 +347,63 @@ export default function CollegePage() {
             <TabsContent value="bulletin" className="mt-6">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold">Student Bulletin Board</h2>
-                <Button>
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Post to Bulletin
-                </Button>
+                <BulletinPostDialog
+                  trigger={
+                    <Button>
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      Post to Bulletin
+                    </Button>
+                  }
+                  onSubmit={async (data) => {
+                    if (!collegeId) throw new Error("No college ID");
+                    await addDoc(collection(db, `Colleges/${collegeId}/Bulletin`), data);
+                  }}
+                  defaultAuthorName={userData?.name || ""}
+                  defaultAuthorAvatar={userData?.default_avatar || "/placeholder.svg?height=40&width=40"}
+                />
               </div>
-              <div className="grid gap-6">
-                {bulletins.map((bulletin) => (
-                  <Card key={bulletin.id}>
-                    <CardHeader>
-                      <div className="flex items-center gap-3">
-                        <Avatar>
-                          <AvatarImage src={bulletin.author.avatar || "/placeholder.svg"} alt={bulletin.author.name} />
-                          <AvatarFallback>{bulletin.author.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <CardTitle className="text-base">{bulletin.title}</CardTitle>
-                          <CardDescription>
-                            Posted by {bulletin.author.name} • {bulletin.date}
-                          </CardDescription>
+              {bulletinsLoading ? (
+                <div>Loading bulletins…</div>
+              ) : bulletinsError ? (
+                <div className="text-red-500">Error loading bulletins: {bulletinsError}</div>
+              ) : (
+                <div className="grid gap-6">
+                  {bulletins.map((bulletin) => (
+                    <Card key={bulletin.id}>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <Avatar>
+                            <AvatarImage src={bulletin.author.avatar || "/placeholder.svg"} alt={bulletin.author.name} />
+                            <AvatarFallback>{bulletin.author.name.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <CardTitle className="text-base">{bulletin.title}</CardTitle>
+                            <CardDescription>
+                              Posted by {bulletin.author.name} • {bulletin.date}
+                            </CardDescription>
+                          </div>
                         </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <p>{bulletin.content}</p>
-                    </CardContent>
-                    <CardFooter className="flex justify-between">
-                      <Button variant="ghost" size="sm">
-                        <ThumbsUp className="mr-2 h-4 w-4" />
-                        Like
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <MessageCircle className="mr-2 h-4 w-4" />
-                        Comment
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        Share
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                ))}
-              </div>
+                      </CardHeader>
+                      <CardContent>
+                        <p>{bulletin.content}</p>
+                      </CardContent>
+                      <CardFooter className="flex justify-between">
+                        <Button variant="ghost" size="sm">
+                          <ThumbsUp className="mr-2 h-4 w-4" />
+                          Like
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <MessageCircle className="mr-2 h-4 w-4" />
+                          Comment
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          Share
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         </div>

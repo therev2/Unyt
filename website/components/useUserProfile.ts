@@ -8,8 +8,10 @@ export interface UserProfile {
   username?: string;
   email?: string;
   college?: string;
+  collegeId?: string;
   regNo?: string;
   avatar?: string;
+  default_avatar?: string;
   year?: string;
   branch?: string;
   bio?: string;

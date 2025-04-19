@@ -92,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'CampusConnext',
+                      'Unyt',
                       style: Theme.of(
                         context,
                       ).textTheme.headlineMedium?.copyWith(
@@ -240,19 +240,43 @@ class _LoginScreenState extends State<LoginScreen> {
                       icon: Icons.g_mobiledata_rounded,
                       text: 'Continue with Google',
                       color: Colors.red,
-                      onPressed: () {
-                        // Implement Google Sign In
+                      onPressed: () async {
+                        setState(() {
+                          _isLoading = true;
+                        });
+                        try {
+                          final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                          final success = await authProvider.signInWithGoogle();
+                          if (success && mounted) {
+                            Navigator.pushReplacementNamed(context, '/main');
+                          } else if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Google sign-in failed'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Google sign-in failed: ${e.toString()}'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        } finally {
+                          if (mounted) {
+                            setState(() {
+                              _isLoading = false;
+                            });
+                          }
+                        }
                       },
                     ),
                     const SizedBox(height: 12),
-                    SocialLoginButton(
-                      icon: Icons.facebook_rounded,
-                      text: 'Continue with Facebook',
-                      color: Colors.blue,
-                      onPressed: () {
-                        // Implement Facebook Sign In
-                      },
-                    ),
+                    
                   ],
                 ),
 

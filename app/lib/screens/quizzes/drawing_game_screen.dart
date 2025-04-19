@@ -11,6 +11,41 @@ class DrawingGameScreen extends StatefulWidget {
 }
 
 class _DrawingGameScreenState extends State<DrawingGameScreen> {
+  // --- Drawing Serialization Helpers ---
+  // Convert List<List<Offset>> to List<Map<String, double>?> (with null as line separator)
+  List<Map<String, double>?> flattenLines(List<List<Offset>> lines) {
+    final flat = <Map<String, double>?>[];
+    for (final line in lines) {
+      for (final pt in line) {
+        flat.add({'x': pt.dx, 'y': pt.dy});
+      }
+      flat.add(null); // Separator
+    }
+    return flat;
+  }
+
+  // Convert Firestore data back to List<List<Offset>>
+  List<List<Offset>> unflattenLines(List data) {
+    final result = <List<Offset>>[];
+    var currentLine = <Offset>[];
+    for (final item in data) {
+      if (item == null) {
+        if (currentLine.isNotEmpty) {
+          result.add(List<Offset>.from(currentLine));
+          currentLine.clear();
+        }
+      } else if (item is Map) {
+        final dx = (item['x'] as num).toDouble();
+        final dy = (item['y'] as num).toDouble();
+        currentLine.add(Offset(dx, dy));
+      }
+    }
+    if (currentLine.isNotEmpty) {
+      result.add(currentLine);
+    }
+    return result;
+  }
+
   String? _roomShortCode;
   String? _roomId;
   bool _waitingForPlayers = false;
@@ -37,14 +72,18 @@ class _DrawingGameScreenState extends State<DrawingGameScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  late final TextEditingController _guessController;
+
   @override
   void initState() {
     super.initState();
     _currentUserId = _auth.currentUser?.uid;
+    _guessController = TextEditingController();
   }
 
   @override
   void dispose() {
+    _guessController.dispose();
     if (_roomId != null && !_gameStarted) {
       _firestore.collection('drawing_rooms').doc(_roomId).delete();
     }
@@ -214,7 +253,8 @@ class _DrawingGameScreenState extends State<DrawingGameScreen> {
         _chatMessages = List<Map<String, dynamic>>.from(data['chat'] ?? []);
         _gameStarted = data['status'] == 'playing';
         _waitingForPlayers = data['status'] == 'waiting';
-        _lines = (data['drawing'] as List?)?.map<List<Offset>>((line) => (line as List).map<Offset>((pt) => Offset((pt[0] as num).toDouble(), (pt[1] as num).toDouble())).toList()).toList() ?? [];
+        _lines = data['drawing'] != null ? unflattenLines(data['drawing']) : [];
+        print('[DRAWING_GAME] _lines updated from Firestore. New count: [34m${_lines.length}[0m'); // DEBUG
         _round = data['round'] ?? 1;
         _maxRounds = data['maxRounds'] ?? 3;
         _timeLeft = data['timeLeft'] ?? _roundTime;
@@ -302,7 +342,7 @@ class _DrawingGameScreenState extends State<DrawingGameScreen> {
 
   Widget _buildGameScreen() {
     final isDrawer = _drawerId == _currentUserId;
-    TextEditingController _guessController = TextEditingController();
+    // Only the drawer can draw and update _lines locally. Others must only view _lines from Firestore.
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -315,19 +355,27 @@ class _DrawingGameScreenState extends State<DrawingGameScreen> {
         Text('Scores: ' + _scores.entries.map((e) => '${_players.firstWhere((p) => p['uid'] == e.key, orElse: () => {'displayName': 'Player'})['displayName']}: ${e.value}').join(', ')),
         const SizedBox(height: 8),
         Text('Time left: $_timeLeft s'),
+        // DEBUG: Show number of lines in _lines for all users
+        Text('[DEBUG] Lines count: [34m${_lines.length}[0m'),
         const SizedBox(height: 12),
-        GestureDetector(
-          onPanStart: _drawerId == _currentUserId && _roundActive ? (details) {
-            setState(() {
-              _lines.add([details.localPosition]);
+         GestureDetector(
+          onPanStart: isDrawer && _roundActive ? (details) {
+            // Instead of updating _lines locally, create a new local copy, add the new line, and push to Firestore.
+            final newLines = List<List<Offset>>.from(_lines.map((l) => List<Offset>.from(l)));
+            newLines.add([details.localPosition]);
+            print('[DRAWING_GAME] Drawer writing new line to Firestore. Total lines: [32m${newLines.length}[0m'); // DEBUG
+            _firestore.collection('drawing_rooms').doc(_roomId).update({
+              'drawing': flattenLines(newLines),
             });
           } : null,
-          onPanUpdate: _drawerId == _currentUserId && _roundActive ? (details) {
-            setState(() {
-              _lines.last.add(details.localPosition);
-            });
+          onPanUpdate: isDrawer && _roundActive ? (details) {
+            // Instead of updating _lines locally, create a new local copy, update the last line, and push to Firestore.
+            if (_lines.isEmpty) return;
+            final newLines = List<List<Offset>>.from(_lines.map((l) => List<Offset>.from(l)));
+            newLines.last.add(details.localPosition);
+            print('[DRAWING_GAME] Drawer updating last line in Firestore. Total lines: [32m${newLines.length}[0m'); // DEBUG
             _firestore.collection('drawing_rooms').doc(_roomId).update({
-              'drawing': _lines.map((line) => line.map((pt) => [pt.dx, pt.dy]).toList()).toList(),
+              'drawing': flattenLines(newLines),
             });
           } : null,
           child: Container(
@@ -344,8 +392,12 @@ class _DrawingGameScreenState extends State<DrawingGameScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32.0),
             child: TextField(
+              controller: _guessController,
               decoration: const InputDecoration(hintText: 'Type your guess...'),
-              onSubmitted: (value) => _submitGuess(value),
+              onSubmitted: (value) {
+                _submitGuess(value);
+                _guessController.clear();
+              },
             ),
           ),
         const SizedBox(height: 16),

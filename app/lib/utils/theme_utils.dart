@@ -20,14 +20,12 @@ ThemeData getLightTheme() {
   return ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
-    colorScheme: ColorScheme.light(
+    colorScheme: const ColorScheme.light(
       primary: primaryColor,
       secondary: secondaryColor,
-      background: lightBackgroundColor,
       surface: lightSurfaceColor,
       onPrimary: Colors.white,
       onSecondary: Colors.white,
-      onBackground: lightTextColor,
       onSurface: lightTextColor,
     ),
     scaffoldBackgroundColor: lightBackgroundColor,
@@ -39,9 +37,7 @@ ThemeData getLightTheme() {
     cardTheme: CardTheme(
       color: lightSurfaceColor,
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
@@ -64,19 +60,13 @@ ThemeData getLightTheme() {
         backgroundColor: primaryColor,
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(
-        foregroundColor: primaryColor,
-      ),
+      style: TextButton.styleFrom(foregroundColor: primaryColor),
     ),
-    dividerTheme: DividerThemeData(
-      color: Colors.grey.shade200,
-    ),
+    dividerTheme: DividerThemeData(color: Colors.grey.shade200),
   );
 }
 
@@ -84,14 +74,12 @@ ThemeData getDarkTheme() {
   return ThemeData(
     useMaterial3: true,
     brightness: Brightness.dark,
-    colorScheme: ColorScheme.dark(
+    colorScheme: const ColorScheme.dark(
       primary: primaryColor,
       secondary: secondaryColor,
-      background: darkBackgroundColor,
       surface: darkSurfaceColor,
       onPrimary: Colors.white,
       onSecondary: Colors.white,
-      onBackground: darkTextColor,
       onSurface: darkTextColor,
     ),
     scaffoldBackgroundColor: darkBackgroundColor,
@@ -103,9 +91,7 @@ ThemeData getDarkTheme() {
     cardTheme: CardTheme(
       color: darkSurfaceColor,
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
@@ -128,18 +114,12 @@ ThemeData getDarkTheme() {
         backgroundColor: primaryColor,
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(
-        foregroundColor: primaryColor,
-      ),
+      style: TextButton.styleFrom(foregroundColor: primaryColor),
     ),
-    dividerTheme: DividerThemeData(
-      color: Colors.grey.shade800,
-    ),
+    dividerTheme: DividerThemeData(color: Colors.grey.shade800),
   );
 }

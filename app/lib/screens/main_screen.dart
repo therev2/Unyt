@@ -27,6 +27,9 @@ class _MainScreenState extends State<MainScreen> {
     const GlobalFeedScreen(),
     const EventsScreen(),
     const QuizzesScreen(),
+    const ForumsScreen(),
+    const LeaderboardsScreen(),
+    const ProfileScreen(),
   ];
 
   final List<String> _titles = [
@@ -34,6 +37,9 @@ class _MainScreenState extends State<MainScreen> {
     'Global Feed',
     'Events',
     'Quizzes & Battles',
+    'Discussion Forums',
+    'Leaderboards',
+    'My Profile',
   ];
 
   @override
@@ -55,9 +61,7 @@ class _MainScreenState extends State<MainScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder:
-            (context) =>
-                Scaffold(appBar: AppBar(title: Text(title)), body: screen),
+        builder: (context) => screen,
       ),
     );
   }
@@ -85,14 +89,10 @@ class _MainScreenState extends State<MainScreen> {
         ],
       ),
       drawer: CampusDrawer(
-        onForumsPressed:
-            () => _navigateToScreen(const ForumsScreen(), 'Discussion Forums'),
-        onLeaderboardsPressed:
-            () => _navigateToScreen(const LeaderboardsScreen(), 'Leaderboards'),
-        onProfilePressed:
-            () => _navigateToScreen(const ProfileScreen(), 'My Profile'),
-        onSettingsPressed:
-            () => _navigateToScreen(const SettingsScreen(), 'Settings'),
+        onForumsPressed: () => _onMainNavItemTapped(4),
+        onLeaderboardsPressed: () => _onMainNavItemTapped(5),
+        onProfilePressed: () => _onMainNavItemTapped(6),
+        onSettingsPressed: () => _navigateToScreen(const SettingsScreen(), 'Settings'),
         userName: authProvider.username ?? 'User',
         userEmail: authProvider.email ?? 'user@example.com',
         userCollege: 'College',

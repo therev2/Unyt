@@ -286,7 +286,7 @@ class _QuizzesScreenState extends State<QuizzesScreen>
           Expanded(
             child: GridView.builder(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
+                crossAxisCount: 1,
                 childAspectRatio: 0.75,
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
@@ -309,8 +309,9 @@ class _QuizzesScreenState extends State<QuizzesScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Wrap(
+            runSpacing: 10,
+            direction: Axis.horizontal,
             children: [
               Text(
                 'Live Battle Rooms',
@@ -322,6 +323,11 @@ class _QuizzesScreenState extends State<QuizzesScreen>
                 },
                 icon: const Icon(Icons.add),
                 label: const Text('Create Room'),
+                style: const ButtonStyle(
+                  padding: MaterialStatePropertyAll(
+                    EdgeInsets.symmetric(horizontal: 16.0),
+                  ),
+                ),
               ),
             ],
           ),
@@ -498,6 +504,9 @@ class _QuizzesScreenState extends State<QuizzesScreen>
                               onPressed: () {
                                 // Retake quiz
                               },
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: const Size(120, 20),
+                              ),
                               child: const Text('Retake Quiz'),
                             ),
                           ],

@@ -204,10 +204,10 @@ class _LeaderboardsScreenState extends State<LeaderboardsScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Leaderboards'),
-        bottom: TabBar(
+    return Column(
+      children: [
+        // TabBar
+        TabBar(
           controller: _tabController,
           tabs: const [
             Tab(text: 'Colleges'),
@@ -216,43 +216,43 @@ class _LeaderboardsScreenState extends State<LeaderboardsScreen>
             Tab(text: 'Competitions'),
           ],
         ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          // Colleges Tab
-          _buildLeaderboardTab(
-            'College Leaderboard',
-            'Top performing colleges based on overall participation and achievements.',
-            collegeLeaderboard,
-            false,
+        // TabBarView
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              // Colleges Tab
+              _buildLeaderboardTab(
+                'College Leaderboard',
+                'Top performing colleges based on overall participation and achievements.',
+                collegeLeaderboard,
+                false,
+              ),
+              // Students Tab
+              _buildLeaderboardTab(
+                'Student Leaderboard',
+                'Top performing students based on quiz scores, competition wins, and forum contributions.',
+                studentLeaderboard,
+                true,
+              ),
+              // Quizzes Tab
+              _buildLeaderboardTab(
+                'Quiz Champions',
+                'Students with the highest scores in quizzes and battles.',
+                studentLeaderboard,
+                true,
+              ),
+              // Competitions Tab
+              _buildLeaderboardTab(
+                'Competition Winners',
+                'Students and colleges with the most competition wins.',
+                studentLeaderboard,
+                true,
+              ),
+            ],
           ),
-
-          // Students Tab
-          _buildLeaderboardTab(
-            'Student Leaderboard',
-            'Top performing students based on quiz scores, competition wins, and forum contributions.',
-            studentLeaderboard,
-            true,
-          ),
-
-          // Quizzes Tab
-          _buildLeaderboardTab(
-            'Quiz Champions',
-            'Students with the highest scores in quizzes and battles.',
-            studentLeaderboard,
-            true,
-          ),
-
-          // Competitions Tab
-          _buildLeaderboardTab(
-            'Competition Winners',
-            'Students and colleges with the most competition wins.',
-            studentLeaderboard,
-            true,
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -342,7 +342,7 @@ class _LeaderboardsScreenState extends State<LeaderboardsScreen>
           // Top 3 Podium
           if (entries.length >= 3)
             SizedBox(
-              height: 180,
+              height: 230,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.end,

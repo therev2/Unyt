@@ -243,6 +243,11 @@ class _GlobalFeedScreenState extends State<GlobalFeedScreen> {
                 },
                 icon: const Icon(Icons.notifications),
                 label: const Text('Subscribe'),
+                style: const ButtonStyle(
+                  padding: MaterialStatePropertyAll(
+                    EdgeInsets.symmetric(horizontal: 16.0),
+                  ),
+                ),
               ),
             ],
           ),
@@ -266,8 +271,10 @@ class _GlobalFeedScreenState extends State<GlobalFeedScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            runSpacing: 10.0, // Space between rows when wrapped
             children: [
               Text(
                 'National & Global Events',
@@ -275,10 +282,15 @@ class _GlobalFeedScreenState extends State<GlobalFeedScreen> {
               ),
               ElevatedButton.icon(
                 onPressed: () {
-                  // Add to calendar
+                  // Implement calendar integration
                 },
                 icon: const Icon(Icons.calendar_today),
                 label: const Text('Add to Calendar'),
+                style: const ButtonStyle(
+                  padding: MaterialStatePropertyAll(
+                    EdgeInsets.symmetric(horizontal: 16.0),
+                  ),
+                ),
               ),
             ],
           ),
@@ -315,6 +327,11 @@ class _GlobalFeedScreenState extends State<GlobalFeedScreen> {
                 },
                 icon: const Icon(Icons.add),
                 label: const Text('Create Poll'),
+                style: const ButtonStyle(
+                  padding: MaterialStatePropertyAll(
+                    EdgeInsets.symmetric(horizontal: 16.0),
+                  ),
+                ),
               ),
             ],
           ),
@@ -449,7 +466,7 @@ class _GlobalFeedScreenState extends State<GlobalFeedScreen> {
               color:
                   isMe
                       ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.surfaceVariant,
+                      : Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Column(
@@ -509,8 +526,9 @@ class _GlobalFeedScreenState extends State<GlobalFeedScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Wrap(
+            runSpacing: 8,
+            direction: Axis.horizontal,
             children: [
               Text(
                 'National Bulletin Board',
@@ -522,6 +540,11 @@ class _GlobalFeedScreenState extends State<GlobalFeedScreen> {
                 },
                 icon: const Icon(Icons.add),
                 label: const Text('Post to Bulletin'),
+                style: const ButtonStyle(
+                  padding: MaterialStatePropertyAll(
+                    EdgeInsets.symmetric(horizontal: 16.0),
+                  ),
+                ),
               ),
             ],
           ),

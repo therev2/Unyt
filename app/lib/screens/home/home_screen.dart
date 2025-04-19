@@ -319,6 +319,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
                 icon: const Icon(Icons.notifications),
                 label: const Text('Subscribe'),
+                style: const ButtonStyle(
+                  padding: MaterialStatePropertyAll(
+                    EdgeInsets.symmetric(horizontal: 16.0),
+                  ),
+                ),
               ),
             ],
           ),
@@ -345,8 +350,10 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Wrap(
+            runSpacing: 8,
+            spacing: 8.0,
+            alignment: WrapAlignment.spaceBetween,
             children: [
               Text(
                 'Upcoming Events',
@@ -358,6 +365,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
                 icon: const Icon(Icons.calendar_today),
                 label: const Text('Add to Calendar'),
+                style: const ButtonStyle(
+                  padding: WidgetStatePropertyAll(
+                    EdgeInsets.symmetric(horizontal: 16.0),
+                  ),
+                ),
               ),
             ],
           ),
@@ -394,6 +406,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
                 icon: const Icon(Icons.add),
                 label: const Text('Create Poll'),
+                style: const ButtonStyle(
+                  padding: MaterialStatePropertyAll(
+                    EdgeInsets.symmetric(horizontal: 16.0),
+                  ),
+                ),
               ),
             ],
           ),
@@ -591,8 +608,9 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Wrap(
+            runSpacing: 8,
+            direction: Axis.horizontal,
             children: [
               Text(
                 'Student Bulletin Board',
@@ -604,6 +622,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
                 icon: const Icon(Icons.add),
                 label: const Text('Post to Bulletin'),
+                style: const ButtonStyle(
+                  padding: MaterialStatePropertyAll(
+                    EdgeInsets.symmetric(horizontal: 16.0),
+                  ),
+                ),
               ),
             ],
           ),

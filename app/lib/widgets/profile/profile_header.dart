@@ -4,10 +4,7 @@ import 'package:unyt/models/user_profile.dart';
 class ProfileHeader extends StatelessWidget {
   final UserProfile profile;
 
-  const ProfileHeader({
-    super.key,
-    required this.profile,
-  });
+  const ProfileHeader({super.key, required this.profile});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +29,7 @@ class ProfileHeader extends StatelessWidget {
                 backgroundImage: NetworkImage(profile.avatar),
               ),
               const SizedBox(width: 16),
-              
+
               // Basic Info
               Expanded(
                 child: Column(
@@ -40,15 +37,14 @@ class ProfileHeader extends StatelessWidget {
                   children: [
                     Text(
                       profile.name,
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     Text(
                       profile.email,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Row(
@@ -86,56 +82,39 @@ class ProfileHeader extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          
+
           // Bio
-          Text(
-            profile.bio,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
+          Text(profile.bio, style: Theme.of(context).textTheme.bodyMedium),
           const SizedBox(height: 16),
-          
+
           // Skills
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: profile.skills.map((skill) {
-              return Chip(
-                label: Text(skill),
-                padding: EdgeInsets.zero,
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              );
-            }).toList(),
+            children:
+                profile.skills.map((skill) {
+                  return Chip(
+                    label: Text(skill),
+                    padding: EdgeInsets.zero,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  );
+                }).toList(),
           ),
           const SizedBox(height: 16),
-          
+
           // Social Links
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildSocialButton(
-                context,
-                Icons.link,
-                'GitHub',
-                () {
-                  // Open GitHub
-                },
-              ),
-              _buildSocialButton(
-                context,
-                Icons.link,
-                'LinkedIn',
-                () {
-                  // Open LinkedIn
-                },
-              ),
-              _buildSocialButton(
-                context,
-                Icons.link,
-                'Twitter',
-                () {
-                  // Open Twitter
-                },
-              ),
+              _buildSocialButton(context, Icons.link, 'GitHub', () {
+                // Open GitHub
+              }),
+              _buildSocialButton(context, Icons.link, 'LinkedIn', () {
+                // Open LinkedIn
+              }),
+              _buildSocialButton(context, Icons.link, 'Twitter', () {
+                // Open Twitter
+              }),
             ],
           ),
         ],
@@ -156,7 +135,7 @@ class ProfileHeader extends StatelessWidget {
         icon: Icon(icon, size: 16),
         label: Text(label),
         style: OutlinedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         ),
       ),
     );

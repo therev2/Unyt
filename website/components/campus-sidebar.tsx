@@ -47,6 +47,9 @@ interface NavItem {
 }
 
 import { useUserProfile } from "@/components/useUserProfile";
+import { useRouter } from "next/navigation";
+import { signOut } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 // Main navigation items
 const mainNavItems: NavItem[] = [
@@ -93,7 +96,18 @@ const featureNavItems: NavItem[] = [
 
 export function CampusSidebar() {
   const { userData, loading, error } = useUserProfile();
-  const pathname = usePathname()
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push("/");
+    } catch (err) {
+      // Optionally show error to user
+      console.error("Logout failed", err);
+    }
+  };
 
   // Set active state based on current path
   const getNavItemsWithActiveState = (items: NavItem[]) => {
@@ -239,7 +253,7 @@ export function CampusSidebar() {
                   </a>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
                 </DropdownMenuItem>
@@ -249,7 +263,7 @@ export function CampusSidebar() {
 
           <div className="flex items-center justify-between">
             <ThemeToggle />
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
               Logout
             </Button>

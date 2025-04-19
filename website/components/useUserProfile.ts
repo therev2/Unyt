@@ -4,6 +4,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 
 export interface UserProfile {
+  uid?: string;
   name?: string;
   username?: string;
   email?: string;
@@ -44,7 +45,7 @@ export function useUserProfile(refreshKey = 0) {
           const res = await fetch(`/api/profile?uid=${user.uid}`);
           if (!res.ok) throw new Error("Failed to fetch profile");
           const data = await res.json();
-          setUserData(data);
+          setUserData({ ...data, uid: user.uid });
         } catch (e: any) {
           setError(e.message || "Failed to load profile");
         }

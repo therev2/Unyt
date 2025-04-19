@@ -11,6 +11,7 @@ import { db } from "@/lib/firebase";
 import { collection, getDocs, addDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import BulletinPostDialog from "@/components/bulletin-post-dialog";
+import CollegePollVote from "@/components/college-poll-vote";
 
 function useFirestoreEvents(collegeId: string | undefined) {
   const [events, setEvents] = useState<any[]>([]);
@@ -111,7 +112,7 @@ function useFirestoreNotices(collegeId: string | undefined) {
   return { notices, loading, error };
 }
 
-function useFirestorePolls(collegeId: string | undefined) {
+function useFirestorePolls(collegeId: string | undefined, pollsRefreshKey: number) {
   const [polls, setPolls] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -141,7 +142,7 @@ function useFirestorePolls(collegeId: string | undefined) {
         setError(err.message);
         setLoading(false);
       });
-  }, [collegeId]);
+  }, [collegeId, pollsRefreshKey]);
 
   return { polls, loading, error };
 }
@@ -153,22 +154,23 @@ const polls = []
 
 export default function CollegePage() {
   const { userData, loading: profileLoading, error: profileError } = useUserProfile();
+  const [pollsRefreshKey, setPollsRefreshKey] = useState(0);
   const collegeId = userData?.collegeId || userData?.college || "NIT_Trichy"; // fallback for demo
   const { events, loading: eventsLoading, error: eventsError } = useFirestoreEvents(collegeId);
   const { bulletins, loading: bulletinsLoading, error: bulletinsError } = useFirestoreBulletins(collegeId);
   const { notices, loading: noticesLoading, error: noticesError } = useFirestoreNotices(collegeId);
-  const { polls, loading: pollsLoading, error: pollsError } = useFirestorePolls(collegeId);
+  const { polls, loading: pollsLoading, error: pollsError } = useFirestorePolls(collegeId, pollsRefreshKey);
   return (
     <div className="flex flex-col min-h-screen">
       <header className="flex h-16 items-center gap-4 border-b bg-background px-6">
         <SidebarTrigger />
         <div className="flex items-center gap-2">
           <Avatar className="h-8 w-8">
-            <AvatarImage src="/placeholder.svg?height=32&width=32" alt="NIT Trichy" />
-            <AvatarFallback>NIT</AvatarFallback>
+            <AvatarImage src="/placeholder.svg?height=32&width=32" alt={userData?.college || "College"} />
+            <AvatarFallback>{userData?.college ? userData.college.slice(0, 3).toUpperCase() : "COL"}</AvatarFallback>
           </Avatar>
           <div>
-            <h1 className="font-semibold">NIT Trichy</h1>
+            <h1 className="font-semibold">{userData?.college || "Your College"}</h1>
             <p className="text-xs text-muted-foreground">Your College Homepage</p>
           </div>
         </div>
@@ -255,9 +257,10 @@ export default function CollegePage() {
                   {events.map((event) => (
                     <Card key={event.id} className="overflow-hidden">
                       <img
-                        src={event.image || "/placeholder.svg"}
-                        alt={event.title}
-                        className="w-full h-40 object-cover"
+                        src={event.image ? event.image : "/placeholder.svg?height=100&width=200"}
+                        alt={event.title || "Event image"}
+                        className="w-full h-40 object-cover bg-muted"
+                        onError={(e) => { e.currentTarget.src = "/placeholder.svg?height=100&width=200"; }}
                       />
                       <CardHeader>
                         <CardTitle>{event.title}</CardTitle>
@@ -302,26 +305,8 @@ export default function CollegePage() {
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="space-y-4">
-                          {poll.options.map((option: any) => {
-                            const percentage = poll.totalVotes > 0 ? Math.round((option.votes / poll.totalVotes) * 100) : 0;
-                            return (
-                              <div key={option.id} className="space-y-2">
-                                <div className="flex justify-between">
-                                  <span>{option.text}</span>
-                                  <span>{percentage}%</span>
-                                </div>
-                                <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
-                                  <div className="h-full bg-primary" style={{ width: `${percentage}%` }} />
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
+                        <CollegePollVote poll={poll} collegeId={collegeId} onVoted={() => setPollsRefreshKey((k) => k + 1)} />
                       </CardContent>
-                      <CardFooter>
-                        <Button className="w-full">Vote Now</Button>
-                      </CardFooter>
                     </Card>
                   ))}
                 </div>

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:unyt/providers/auth_provider.dart';
 import 'package:unyt/providers/theme_provider.dart';
+import 'package:unyt/screens/chatbot/chatbot_screen.dart';
 
 class CampusDrawer extends StatelessWidget {
   final VoidCallback onForumsPressed;
@@ -111,6 +112,16 @@ class CampusDrawer extends StatelessWidget {
             leading: const Icon(Icons.leaderboard),
             title: const Text('Leaderboards'),
             onTap: onLeaderboardsPressed,
+          ),
+          ListTile(
+            leading: const Icon(Icons.smart_toy_outlined),
+            title: const Text('Ask Your Buddy'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const ChatbotScreen()),
+              );
+            },
           ),
           const Divider(),
           const Padding(

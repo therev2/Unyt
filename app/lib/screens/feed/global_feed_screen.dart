@@ -9,6 +9,7 @@ import 'package:unyt/models/poll.dart';
 import 'package:unyt/models/bulletin.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:unyt/screens/chatbot/chatbot_screen.dart';
 
 class GlobalFeedScreen extends StatefulWidget {
   const GlobalFeedScreen({super.key});
@@ -167,6 +168,70 @@ class _GlobalFeedScreenState extends State<GlobalFeedScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor,
+              ),
+              child: Text('Main Navigation', style: TextStyle(color: Colors.white, fontSize: 20)),
+            ),
+            ListTile(
+              leading: Icon(Icons.notifications_none),
+              title: Text('Notices'),
+              onTap: () {
+                Navigator.pop(context);
+                _onItemTapped(0);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.event_outlined),
+              title: Text('Events'),
+              onTap: () {
+                Navigator.pop(context);
+                _onItemTapped(1);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.poll_outlined),
+              title: Text('Polls'),
+              onTap: () {
+                Navigator.pop(context);
+                _onItemTapped(2);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.chat_bubble_outline),
+              title: Text('Chat'),
+              onTap: () {
+                Navigator.pop(context);
+                _onItemTapped(3);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.dashboard_outlined),
+              title: Text('Bulletin'),
+              onTap: () {
+                Navigator.pop(context);
+                _onItemTapped(4);
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: Icon(Icons.smart_toy_outlined),
+              title: Text('Gemini Chatbot'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const ChatbotScreen()),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
       body: PageView(
         controller: _pageController,
         onPageChanged: (index) {

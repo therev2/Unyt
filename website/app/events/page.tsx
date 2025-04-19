@@ -11,8 +11,9 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useEffect, useState } from "react";
-import { db } from "@/lib/firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { db, auth } from "@/lib/firebase";
+import { collection, getDocs, doc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
 
 // Sample team data (migrated from competitions page)
 const myTeams = [
@@ -67,6 +68,42 @@ const currentMonth = "May 2023"
 
 
 export default function EventsPage() {
+  const [student, setStudent] = useState<any>(null);
+  const [registeredEvents, setRegisteredEvents] = useState<string[]>([]);
+  const [userLoading, setUserLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const studentRef = doc(db, "Students", user.uid);
+        const studentSnap = await getDoc(studentRef);
+        if (studentSnap.exists()) {
+          setStudent(studentSnap.data());
+          setRegisteredEvents(studentSnap.data().registeredEvents || []);
+        }
+      }
+      setUserLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleRegister = async (eventId: string) => {
+    if (!student || !auth.currentUser) {
+      alert("You must be signed in to register.");
+      return;
+    }
+    try {
+      const studentRef = doc(db, "Students", auth.currentUser.uid);
+      await updateDoc(studentRef, {
+        registeredEvents: arrayUnion(eventId)
+      });
+      setRegisteredEvents((prev) => [...prev, eventId]);
+      alert("Registration successful!");
+    } catch (error) {
+      console.error("Registration failed:", error);
+      alert("Registration failed: " + (error as Error).message);
+    }
+  };
   // Filter state
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [selectedCollege, setSelectedCollege] = useState("All Colleges");
@@ -267,7 +304,11 @@ export default function EventsPage() {
                               <p className="text-sm text-muted-foreground">
                                 Event type: {event.eventtype || "N/A"}
                               </p>
-                              <Button>Register Now</Button>
+                              {registeredEvents.includes(event.id) ? (
+  <Button variant="secondary" disabled>Registered</Button>
+) : (
+  <Button variant="default" onClick={() => handleRegister(event.id)}>Register Now</Button>
+)}
                             </CardFooter>
                           </div>
                         </div>
@@ -413,35 +454,64 @@ export default function EventsPage() {
             </TabsContent>
 
             <TabsContent value="registered" className="mt-0">
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {events.slice(0, 2).map((event) => (
-                  <Card key={event.id} className="overflow-hidden">
-                    <img
-                      src={event.image || (event.title === "Athletic Meet" ? "/athletic-meet.jpg" : "/placeholder.svg")}
-                      alt={event.title || "Event"}
-                      className="h-48 w-full object-cover"
+  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    {events.filter(event => registeredEvents.includes(event.id)).map((event) => (
+      <Card key={event.id} className="overflow-hidden">
+        <div className="sm:flex">
+          <div className="sm:w-1/3">
+            <img
+              src={event.image || "/placeholder.svg"}
+              alt={event.title || "Event"}
+              className="h-48 w-full object-cover sm:h-full"
+            />
+          </div>
+          <div className="sm:w-2/3">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Avatar className="h-6 w-6">
+                    <AvatarImage
+                      src={event.image || "/placeholder.svg"}
+                      alt={event.collegename || "College"}
                     />
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-base">{event.title}</CardTitle>
-                        <Badge>{event.category}</Badge>
-                      </div>
-                      <CardDescription>{event.date}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <MapPin className="h-4 w-4" />
-                        {event.location}
-                      </div>
-                    </CardContent>
-                    <CardFooter className="flex justify-between">
-                      <Button variant="outline">View Details</Button>
-                      <Button variant="destructive">Cancel Registration</Button>
-                    </CardFooter>
-                  </Card>
-                ))}
+                    <AvatarFallback>{(event.collegename && event.collegename.charAt(0)) || "C"}</AvatarFallback>
+                  </Avatar>
+                  <CardTitle className="text-lg">{event.title || "Event Title"}</CardTitle>
+                </div>
+                <Badge>{event.eventtype || "Type"}</Badge>
               </div>
-            </TabsContent>
+              <CardDescription>Hosted by {event.collegename || "College"}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="mb-4 line-clamp-2">{event.content || "No description available."}</p>
+              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center">
+                  <Calendar className="mr-1 h-4 w-4" />
+                  {event.eventdates || "Event Dates"}
+                </div>
+                <div className="flex items-center">
+                  <Users className="mr-1 h-4 w-4" />
+                  Members: {event.members || "N/A"}
+                </div>
+                <div className="flex items-center">
+                  <Badge variant="secondary">Prize: ₹{event.prize || "N/A"}</Badge>
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter className="flex justify-between">
+              <Button variant="outline">View Details</Button>
+              <Button variant="secondary" disabled>Registered</Button>
+              <Button variant="secondary">View Photos</Button>
+            </CardFooter>
+          </div>
+        </div>
+      </Card>
+    ))}
+    {events.filter(event => registeredEvents.includes(event.id)).length === 0 && (
+      <div className="col-span-full text-center text-muted-foreground py-8">You have not registered for any events yet.</div>
+    )}
+  </div>
+</TabsContent>
 
             <TabsContent value="past" className="mt-0">
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -532,9 +602,9 @@ return endDay < todayDay;
                       </div>
                     </CardContent>
                     <CardFooter className="flex justify-between">
-                      <Button variant="outline">View Details</Button>
-                      <Button variant="secondary">View Photos</Button>
-                    </CardFooter>
+  <Button variant="outline">View Details</Button>
+  <Button variant="secondary">View Photos</Button>
+</CardFooter>
                   </Card>
                 ))}
               </div>

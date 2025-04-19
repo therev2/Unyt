@@ -6,6 +6,7 @@ import 'package:unyt/widgets/home/bulletin_card.dart';
 import 'package:unyt/models/notice.dart';
 import 'package:unyt/models/event.dart';
 import 'package:unyt/models/poll.dart';
+import 'package:unyt/services/poll_admin_service.dart';
 import 'package:unyt/models/bulletin.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -18,6 +19,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  String? _collegeId;
+  bool _isCollegeIdLoading = true;
   int _selectedIndex = 0;
   final PageController _pageController = PageController();
   List<Notice> notices = [];
@@ -28,8 +31,22 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _fetchCollegeId();
     fetchNotices();
     fetchEvents();
+  }
+
+  Future<void> _fetchCollegeId() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    final studentDoc = await FirebaseFirestore.instance
+        .collection('Students')
+        .doc(user.uid)
+        .get();
+    setState(() {
+      _collegeId = studentDoc.data()?['collegeId'];
+      _isCollegeIdLoading = false;
+    });
   }
 
   Future<void> fetchNotices() async {
@@ -381,8 +398,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               ElevatedButton.icon(
-                onPressed: () {
-                  // Create poll
+                onPressed: _collegeId == null ? null : () async {
+                  await PollAdminService.createSamplePolls(_collegeId!);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Sample polls created!')),
+                  );
                 },
                 icon: const Icon(Icons.add),
                 label: const Text('Create Poll'),
@@ -395,14 +415,52 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          Expanded(
-            child: ListView.builder(
-              itemCount: polls.length,
-              itemBuilder: (context, index) {
-                return PollCard(poll: polls[index]);
-              },
+          if (_isCollegeIdLoading)
+            const Center(child: CircularProgressIndicator())
+          else if (_collegeId == null)
+            const Center(child: Text('No college ID found.'))
+          else
+            Expanded(
+              child: StreamBuilder(
+                stream: FirebaseFirestore.instance
+                    .collection('Colleges')
+                    .doc(_collegeId)
+                    .collection('Polls')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return const Center(child: Text('No polls found.'));
+                  }
+                  final pollDocs = snapshot.data!.docs;
+                  return ListView.builder(
+                    itemCount: pollDocs.length,
+                    itemBuilder: (context, index) {
+                      final pollData = pollDocs[index].data();
+                      final pollId = pollDocs[index].id;
+                      final poll = Poll(
+                        id: index, // or use pollId if your model supports it
+                        question: pollData['question'] ?? '',
+                        options: (pollData['options'] as List<dynamic>).map((o) => PollOption(
+                          id: o['id'],
+                          text: o['text'],
+                          votes: o['votes'],
+                        )).toList(),
+                        totalVotes: pollData['totalVotes'] ?? 0,
+                        endDate: pollData['endDate'] ?? '',
+                      );
+                      return PollCard(
+                        poll: poll,
+                        collegeId: _collegeId!,
+                        pollId: pollId,
+                      );
+                    },
+                  );
+                },
+              ),
             ),
-          ),
         ],
       ),
     );

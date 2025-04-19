@@ -340,7 +340,11 @@ class _GlobalFeedScreenState extends State<GlobalFeedScreen> {
             child: ListView.builder(
               itemCount: polls.length,
               itemBuilder: (context, index) {
-                return PollCard(poll: polls[index]);
+                return PollCard(
+  poll: polls[index],
+  collegeId: 'global', // TODO: Replace with actual global context if needed
+  pollId: polls[index].id.toString(),
+);
               },
             ),
           ),

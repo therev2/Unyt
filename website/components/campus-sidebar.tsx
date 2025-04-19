@@ -68,12 +68,8 @@ const mainNavItems: NavItem[] = [
     title: "Events",
     href: "/events",
     icon: Calendar,
-  },
-  {
-    title: "Competitions",
-    href: "/competitions",
-    icon: Trophy,
-  },
+  }
+
 ]
 
 // Features navigation items

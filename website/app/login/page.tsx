@@ -101,14 +101,39 @@ export default function LoginPage() {
               <span className="mx-2 text-xs text-gray-400">OR</span>
               <div className="flex-1 h-px bg-border" />
             </div>
-            <button type="button" className="w-full h-12 flex items-center justify-center gap-2 rounded-lg bg-white text-border font-semibold border border-border hover:bg-gray-100 transition">
-              <svg className="h-5 w-5" viewBox="0 0 24 24"><path fill="#EA4335" d="M21.35 11.1h-9.18v2.92h5.26c-.23 1.25-1.45 3.67-5.26 3.67-3.17 0-5.76-2.62-5.76-5.84s2.59-5.84 5.76-5.84c1.81 0 3.03.77 3.73 1.43l2.55-2.48C16.36 3.3 14.4 2.3 12 2.3 6.48 2.3 2 6.7 2 12.1s4.48 9.8 10 9.8c5.16 0 9.18-3.77 9.18-9.1 0-.62-.07-1.09-.16-1.6z"/><path fill="#34A853" d="M3.54 7.76l2.52 1.85C7.13 7.15 9.36 5.7 12 5.7c1.81 0 3.03.77 3.73 1.43l2.55-2.48C16.36 3.3 14.4 2.3 12 2.3c-3.9 0-7.1 2.84-8.46 6.46z"/><path fill="#4A90E2" d="M12 21.9c2.4 0 4.36-.8 5.8-2.16l-2.67-2.18c-.74.52-1.7.92-3.13.92-2.42 0-4.47-1.6-5.19-3.77l-2.52 1.95C4.9 20.16 8.18 21.9 12 21.9z"/><path fill="#FBBC05" d="M21.35 11.1h-9.18v2.92h5.26c-.23 1.25-1.45 3.67-5.26 3.67-3.17 0-5.76-2.62-5.76-5.84s2.59-5.84 5.76-5.84c1.81 0 3.03.77 3.73 1.43l2.55-2.48C16.36 3.3 14.4 2.3 12 2.3 6.48 2.3 2 6.7 2 12.1s4.48 9.8 10 9.8c5.16 0 9.18-3.77 9.18-9.1 0-.62-.07-1.09-.16-1.6z"/></svg>
-              Continue with Google
-            </button>
-            <button type="button" className="w-full h-12 flex items-center justify-center gap-2 rounded-lg bg-[#1877f2] text-white font-semibold hover:bg-[#165ec9] transition">
-              <svg className="h-5 w-5" viewBox="0 0 24 24"><path fill="#fff" d="M22.675 0h-21.35C.6 0 0 .6 0 1.326v21.348C0 23.4.6 24 1.326 24h11.495v-9.294H9.692v-3.622h3.129V8.413c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.797.143v3.24h-1.918c-1.504 0-1.797.715-1.797 1.763v2.312h3.587l-.467 3.622h-3.12V24h6.116C23.4 24 24 23.4 24 22.674V1.326C24 .6 23.4 0 22.675 0"/></svg>
-              Continue with Facebook
-            </button>
+            <button
+  type="button"
+  className="w-full h-12 flex items-center justify-center gap-2 rounded-lg bg-white text-border font-semibold border border-border hover:bg-gray-100 transition"
+  onClick={async () => {
+    setError("");
+    try {
+      const { getAuth, GoogleAuthProvider, signInWithPopup } = await import("firebase/auth");
+      const { auth, db } = await import("@/lib/firebase");
+      const { doc, getDoc, setDoc } = await import("firebase/firestore");
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      // Check if user exists in Firestore
+      const studentRef = doc(db, "Students", user.uid);
+      const studentSnap = await getDoc(studentRef);
+      if (!studentSnap.exists()) {
+        await setDoc(studentRef, {
+          uid: user.uid,
+          name: user.displayName || "",
+          email: user.email || "",
+          photoURL: user.photoURL || ""
+        });
+      }
+      router.push("/college");
+    } catch (err: any) {
+      setError(err.message || "Google sign-in failed");
+    }
+  }}
+>
+  <svg className="h-5 w-5" viewBox="0 0 24 24"><path fill="#EA4335" d="M21.35 11.1h-9.18v2.92h5.26c-.23 1.25-1.45 3.67-5.26 3.67-3.17 0-5.76-2.62-5.76-5.84s2.59-5.84 5.76-5.84c1.81 0 3.03.77 3.73 1.43l2.55-2.48C16.36 3.3 14.4 2.3 12 2.3 6.48 2.3 2 6.7 2 12.1s4.48 9.8 10 9.8c5.16 0 9.18-3.77 9.18-9.1 0-.62-.07-1.09-.16-1.6z"/><path fill="#34A853" d="M3.54 7.76l2.52 1.85C7.13 7.15 9.36 5.7 12 5.7c1.81 0 3.03.77 3.73 1.43l2.55-2.48C16.36 3.3 14.4 2.3 12 2.3c-3.9 0-7.1 2.84-8.46 6.46z"/><path fill="#4A90E2" d="M12 21.9c2.4 0 4.36-.8 5.8-2.16l-2.67-2.18c-.74.52-1.7.92-3.13.92-2.42 0-4.47-1.6-5.19-3.77l-2.52 1.95C4.9 20.16 8.18 21.9 12 21.9z"/><path fill="#FBBC05" d="M21.35 11.1h-9.18v2.92h5.26c-.23 1.25-1.45 3.67-5.26 3.67-3.17 0-5.76-2.62-5.76-5.84s2.59-5.84 5.76-5.84c1.81 0 3.03.77 3.73 1.43l2.55-2.48C16.36 3.3 14.4 2.3 12 2.3 6.48 2.3 2 6.7 2 12.1s4.48 9.8 10 9.8c5.16 0 9.18-3.77 9.18-9.1 0-.62-.07-1.09-.16-1.6z"/></svg>
+  Continue with Google
+</button>
+            
           </form>
           <div className="mt-6 text-center text-sm text-gray-400">
             Don't have an account?{' '}

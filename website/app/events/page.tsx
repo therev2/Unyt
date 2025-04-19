@@ -1,137 +1,182 @@
-import { Calendar, ChevronLeft, ChevronRight, Filter, MapPin, Search, Users } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { SidebarTrigger } from "@/components/ui/sidebar"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+"use client";
 
-// Sample data - in a real app, this would come from your database
-const events = [
+import { Calendar, ChevronLeft, ChevronRight, Filter, MapPin, Search, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useEffect, useState } from "react";
+import { db } from "@/lib/firebase";
+import { collection, getDocs } from "firebase/firestore";
+
+// Sample team data (migrated from competitions page)
+const myTeams = [
   {
     id: 1,
-    title: "National Hackathon 2023",
-    description:
-      "A 48-hour coding marathon to build innovative solutions for real-world problems. Open to all college students across the country.",
-    date: "May 20-22, 2023",
-    location: "IIT Delhi",
-    category: "Tech",
-    image: "/placeholder.svg?height=200&width=400",
-    hostCollege: {
-      name: "IIT Delhi",
-      logo: "/placeholder.svg?height=40&width=40",
-    },
-    attendees: 342,
-    registrationDeadline: "May 15, 2023",
+    name: "Code Ninjas",
+    competition: "CodeCraft 2023",
+    members: [
+      {
+        name: "Alex Johnson",
+        college: "NIT Trichy",
+        avatar: "/placeholder.svg?height=40&width=40",
+        isLeader: true,
+      },
+      {
+        name: "Priya Patel",
+        college: "NIT Trichy",
+        avatar: "/placeholder.svg?height=40&width=40",
+      },
+      {
+        name: "Rahul Sharma",
+        college: "NIT Trichy",
+        avatar: "/placeholder.svg?height=40&width=40",
+      },
+    ],
+    status: "Registered",
   },
   {
     id: 2,
-    title: "Inter-College Cultural Festival",
-    description:
-      "The biggest cultural festival featuring music, dance, drama, and art competitions. Showcase your talent and win exciting prizes.",
-    date: "June 5-8, 2023",
-    location: "BITS Pilani",
-    category: "Cultural",
-    image: "/placeholder.svg?height=200&width=400",
-    hostCollege: {
-      name: "BITS Pilani",
-      logo: "/placeholder.svg?height=40&width=40",
-    },
-    attendees: 520,
-    registrationDeadline: "May 30, 2023",
-  },
-  {
-    id: 3,
-    title: "National Business Case Competition",
-    description:
-      "Present your business solutions to real-world problems. Judges from top companies will evaluate your ideas.",
-    date: "May 15, 2023",
-    location: "IIM Ahmedabad",
-    category: "Business",
-    image: "/placeholder.svg?height=200&width=400",
-    hostCollege: {
-      name: "IIM Ahmedabad",
-      logo: "/placeholder.svg?height=40&width=40",
-    },
-    attendees: 210,
-    registrationDeadline: "May 5, 2023",
-  },
-  {
-    id: 4,
-    title: "Sports Tournament 2023",
-    description:
-      "Compete in various sports including cricket, football, basketball, and athletics. Represent your college and win trophies.",
-    date: "June 10-15, 2023",
-    location: "Punjab University",
-    category: "Sports",
-    image: "/placeholder.svg?height=200&width=400",
-    hostCollege: {
-      name: "Punjab University",
-      logo: "/placeholder.svg?height=40&width=40",
-    },
-    attendees: 450,
-    registrationDeadline: "June 1, 2023",
-  },
-  {
-    id: 5,
-    title: "Research Symposium",
-    description:
-      "Present your research papers and get feedback from experts in the field. Network with researchers from other institutions.",
-    date: "May 25, 2023",
-    location: "NIT Trichy",
-    category: "Academic",
-    image: "/placeholder.svg?height=200&width=400",
-    hostCollege: {
-      name: "NIT Trichy",
-      logo: "/placeholder.svg?height=40&width=40",
-    },
-    attendees: 180,
-    registrationDeadline: "May 20, 2023",
+    name: "Debate Masters",
+    competition: "Debate Championship",
+    members: [
+      {
+        name: "Alex Johnson",
+        college: "NIT Trichy",
+        avatar: "/placeholder.svg?height=40&width=40",
+        isLeader: true,
+      },
+      {
+        name: "Sneha Gupta",
+        college: "NIT Trichy",
+        avatar: "/placeholder.svg?height=40&width=40",
+      },
+    ],
+    status: "Pending",
   },
 ]
+
 
 // Calendar data
 const currentMonth = "May 2023"
-const calendarDays = [
-  { date: 1, events: 0 },
-  { date: 2, events: 0 },
-  { date: 3, events: 0 },
-  { date: 4, events: 0 },
-  { date: 5, events: 0 },
-  { date: 6, events: 0 },
-  { date: 7, events: 0 },
-  { date: 8, events: 0 },
-  { date: 9, events: 0 },
-  { date: 10, events: 0 },
-  { date: 11, events: 0 },
-  { date: 12, events: 0 },
-  { date: 13, events: 0 },
-  { date: 14, events: 0 },
-  { date: 15, events: 2, isHighlighted: true },
-  { date: 16, events: 0 },
-  { date: 17, events: 0 },
-  { date: 18, events: 0 },
-  { date: 19, events: 0 },
-  { date: 20, events: 1, isHighlighted: true },
-  { date: 21, events: 1, isHighlighted: true },
-  { date: 22, events: 1, isHighlighted: true },
-  { date: 23, events: 0 },
-  { date: 24, events: 0 },
-  { date: 25, events: 1, isHighlighted: true },
-  { date: 26, events: 0 },
-  { date: 27, events: 0 },
-  { date: 28, events: 0 },
-  { date: 29, events: 0 },
-  { date: 30, events: 0 },
-  { date: 31, events: 0 },
-]
 
-import ChatRoom from "@/components/ChatRoom";
 
 export default function EventsPage() {
+  // Filter state
+  const [selectedCategory, setSelectedCategory] = useState("All Categories");
+  const [selectedCollege, setSelectedCollege] = useState("All Colleges");
+  const [selectedDateRange, setSelectedDateRange] = useState("Upcoming");
+  const [events, setEvents] = useState<any[]>([]);
+  const [loadingEvents, setLoadingEvents] = useState(true);
+
+  // Filtering logic for events
+  const filteredEvents = events.filter(event => {
+    // Category filter
+    if (selectedCategory !== "All Categories" && event.eventtype !== selectedCategory) return false;
+    // College filter
+    if (selectedCollege !== "All Colleges" && event.collegename !== selectedCollege) return false;
+    // Date range filter
+    if (selectedDateRange === "Upcoming" || selectedDateRange === "Past") {
+      const dateMatch = event.eventdates?.match(/([A-Za-z]+) (\d+)(?:-(\d+))?(?:,)? (\d{4})/);
+      if (!dateMatch) return false;
+      const monthName = dateMatch[1];
+      const startDay = parseInt(dateMatch[2], 10);
+      const endDay = dateMatch[3] ? parseInt(dateMatch[3], 10) : startDay;
+      const eventYear = parseInt(dateMatch[4], 10);
+      const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      const eventMonth = months.findIndex(m => m.toLowerCase() === monthName.toLowerCase());
+      if (eventMonth === -1) return false;
+      const now = new Date();
+      const todayDay = now.getDate();
+      const todayMonth = now.getMonth();
+      const todayYear = now.getFullYear();
+      if (selectedDateRange === "Upcoming") {
+        if (eventYear > todayYear) return true;
+        if (eventYear < todayYear) return false;
+        if (eventMonth > todayMonth) return true;
+        if (eventMonth < todayMonth) return false;
+        return endDay >= todayDay;
+      } else if (selectedDateRange === "Past") {
+        if (eventYear < todayYear) return true;
+        if (eventYear > todayYear) return false;
+        if (eventMonth < todayMonth) return true;
+        if (eventMonth > todayMonth) return false;
+        return endDay < todayDay;
+      }
+    }
+    return true;
+  });
+
+  // Generate dynamic calendar days for current month (May 2025)
+  const currentMonth = 4; // May (0-indexed)
+  const currentYear = 2025;
+  const daysInMonth = 31;
+
+  // Calendar selection state
+  const [selectedDay, setSelectedDay] = useState<number | null>(null);
+
+  // Helper to extract days from eventdates like "May 4-6, 2025" or "May 15, 2025"
+  function getEventDays(eventdates: string): number[] {
+    if (!eventdates) return [];
+    // Only process events for May 2025
+    if (!eventdates.includes("May") || !eventdates.includes("2025")) return [];
+    const rangeMatch = eventdates.match(/May (\d+)-(\d+), 2025/);
+    if (rangeMatch) {
+      const start = parseInt(rangeMatch[1], 10);
+      const end = parseInt(rangeMatch[2], 10);
+      if (!isNaN(start) && !isNaN(end)) {
+        return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+      }
+    }
+    const singleMatch = eventdates.match(/May (\d+), 2025/);
+    if (singleMatch) {
+      const day = parseInt(singleMatch[1], 10);
+      if (!isNaN(day)) return [day];
+    }
+    return [];
+  }
+
+  // Compute event counts for each day
+  const eventCountByDay: Record<number, number> = {};
+  filteredEvents.forEach(event => {
+    getEventDays(event.eventdates).forEach(day => {
+      eventCountByDay[day] = (eventCountByDay[day] || 0) + 1;
+    });
+  });
+
+  const calendarDays = Array.from({ length: daysInMonth }, (_, i) => {
+    const day = i + 1;
+    return {
+      date: day,
+      events: eventCountByDay[day] || 0,
+      isHighlighted: !!eventCountByDay[day],
+    };
+  });
+
+
+  useEffect(() => {
+    async function fetchEvents() {
+      try {
+        const querySnapshot = await getDocs(collection(db, "GlobalEvents"));
+        const fetchedEvents: any[] = [];
+        querySnapshot.forEach((doc) => {
+          fetchedEvents.push({ id: doc.id, ...doc.data() });
+        });
+        setEvents(fetchedEvents);
+      } catch (error) {
+        console.error("Failed to fetch events:", error);
+      } finally {
+        setLoadingEvents(false);
+      }
+    }
+    fetchEvents();
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen">
       <header className="flex h-16 items-center gap-4 border-b bg-background px-6">
@@ -151,6 +196,7 @@ export default function EventsPage() {
                 <TabsTrigger value="calendar">Calendar</TabsTrigger>
                 <TabsTrigger value="registered">Registered</TabsTrigger>
                 <TabsTrigger value="past">Past Events</TabsTrigger>
+                <TabsTrigger value="myteams">My Teams</TabsTrigger>
               </TabsList>
               <div className="flex gap-2">
                 <div className="relative">
@@ -171,13 +217,16 @@ export default function EventsPage() {
               <div className="flex flex-col md:flex-row gap-6">
                 <div className="md:w-3/4">
                   <div className="grid gap-6">
-                    {events.map((event) => (
+                    {filteredEvents.length === 0 && (
+                      <div className="text-muted-foreground col-span-3 text-center py-8">No upcoming events found.</div>
+                    )}
+                    {filteredEvents.map((event) => (
                       <Card key={event.id} className="overflow-hidden">
                         <div className="sm:flex">
                           <div className="sm:w-1/3">
                             <img
                               src={event.image || "/placeholder.svg"}
-                              alt={event.title}
+                              alt={event.title || "Event"}
                               className="h-48 w-full object-cover sm:h-full"
                             />
                           </div>
@@ -187,37 +236,36 @@ export default function EventsPage() {
                                 <div className="flex items-center gap-2">
                                   <Avatar className="h-6 w-6">
                                     <AvatarImage
-                                      src={event.hostCollege.logo || "/placeholder.svg"}
-                                      alt={event.hostCollege.name}
+                                      src={event.image || "/placeholder.svg"}
+                                      alt={event.collegename || "College"}
                                     />
-                                    <AvatarFallback>{event.hostCollege.name.charAt(0)}</AvatarFallback>
+                                    <AvatarFallback>{(event.collegename && event.collegename.charAt(0)) || "C"}</AvatarFallback>
                                   </Avatar>
-                                  <CardTitle className="text-lg">{event.title}</CardTitle>
+                                  <CardTitle className="text-lg">{event.title || "Event Title"}</CardTitle>
                                 </div>
-                                <Badge>{event.category}</Badge>
+                                <Badge>{event.eventtype || "Type"}</Badge>
                               </div>
-                              <CardDescription>Hosted by {event.hostCollege.name}</CardDescription>
+                              <CardDescription>Hosted by {event.collegename || "College"}</CardDescription>
                             </CardHeader>
                             <CardContent>
-                              <p className="mb-4 line-clamp-2">{event.description}</p>
+                              <p className="mb-4 line-clamp-2">{event.content || "No description available."}</p>
                               <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                                 <div className="flex items-center">
                                   <Calendar className="mr-1 h-4 w-4" />
-                                  {event.date}
-                                </div>
-                                <div className="flex items-center">
-                                  <MapPin className="mr-1 h-4 w-4" />
-                                  {event.location}
+                                  {event.eventdates || "Event Dates"}
                                 </div>
                                 <div className="flex items-center">
                                   <Users className="mr-1 h-4 w-4" />
-                                  {event.attendees} attending
+                                  Members: {event.members || "N/A"}
+                                </div>
+                                <div className="flex items-center">
+                                  <Badge variant="secondary">Prize: ₹{event.prize || "N/A"}</Badge>
                                 </div>
                               </div>
                             </CardContent>
                             <CardFooter className="flex justify-between">
                               <p className="text-sm text-muted-foreground">
-                                Registration closes on {event.registrationDeadline}
+                                Event type: {event.eventtype || "N/A"}
                               </p>
                               <Button>Register Now</Button>
                             </CardFooter>
@@ -236,12 +284,12 @@ export default function EventsPage() {
                     <CardContent className="space-y-4">
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Category</label>
-                        <Select defaultValue="all">
+                        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                           <SelectTrigger>
                             <SelectValue placeholder="Select category" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="all">All Categories</SelectItem>
+                            <SelectItem value="All Categories">All Categories</SelectItem>
                             <SelectItem value="tech">Tech</SelectItem>
                             <SelectItem value="cultural">Cultural</SelectItem>
                             <SelectItem value="sports">Sports</SelectItem>
@@ -252,12 +300,12 @@ export default function EventsPage() {
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-medium">College</label>
-                        <Select defaultValue="all">
+                        <Select value={selectedCollege} onValueChange={setSelectedCollege}>
                           <SelectTrigger>
                             <SelectValue placeholder="Select college" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="all">All Colleges</SelectItem>
+                            <SelectItem value="All Colleges">All Colleges</SelectItem>
                             <SelectItem value="iit">IIT Delhi</SelectItem>
                             <SelectItem value="bits">BITS Pilani</SelectItem>
                             <SelectItem value="iim">IIM Ahmedabad</SelectItem>
@@ -267,12 +315,13 @@ export default function EventsPage() {
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Date Range</label>
-                        <Select defaultValue="upcoming">
+                        <Select value={selectedDateRange} onValueChange={setSelectedDateRange}>
                           <SelectTrigger>
                             <SelectValue placeholder="Select date range" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="upcoming">Upcoming</SelectItem>
+                            <SelectItem value="Upcoming">Upcoming</SelectItem>
+                            <SelectItem value="Past">Past</SelectItem>
                             <SelectItem value="today">Today</SelectItem>
                             <SelectItem value="week">This Week</SelectItem>
                             <SelectItem value="month">This Month</SelectItem>
@@ -280,7 +329,7 @@ export default function EventsPage() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <Button className="w-full">Apply Filters</Button>
+                      <Button className="w-full" onClick={() => {}}>Apply Filters</Button>
                     </CardContent>
                   </Card>
                 </div>
@@ -316,9 +365,10 @@ export default function EventsPage() {
                     {calendarDays.map((day) => (
                       <div
                         key={day.date}
-                        className={`relative rounded-md p-2 text-center hover:bg-accent ${
+                        className={`relative rounded-md p-2 text-center hover:bg-accent cursor-pointer ${
                           day.isHighlighted ? "bg-primary/10" : ""
-                        }`}
+                        } ${selectedDay === day.date ? "ring-2 ring-primary" : ""}`}
+                        onClick={() => setSelectedDay(day.date)}
                       >
                         <span className="text-sm">{day.date}</span>
                         {day.events > 0 && (
@@ -333,10 +383,17 @@ export default function EventsPage() {
                 <CardFooter>
                   <div className="space-y-4 w-full">
                     <Separator />
-                    <h3 className="font-medium">Events on May 15, 2023</h3>
+                    <h3 className="font-medium">
+                      {selectedDay ? `Events on May ${selectedDay}, 2025` : "Select a date to view events"}
+                    </h3>
                     <div className="space-y-2">
+                      {events.filter(event =>
+                        selectedDay !== null && getEventDays(event.eventdates).includes(selectedDay)
+                      ).length === 0 && (
+                        <div className="text-muted-foreground">No events on this day.</div>
+                      )}
                       {events
-                        .filter((event) => event.date.includes("May 15"))
+                        .filter(event => selectedDay !== null && getEventDays(event.eventdates).includes(selectedDay))
                         .map((event) => (
                           <div key={event.id} className="flex items-center justify-between rounded-md border p-3">
                             <div className="flex items-center gap-2">
@@ -360,8 +417,8 @@ export default function EventsPage() {
                 {events.slice(0, 2).map((event) => (
                   <Card key={event.id} className="overflow-hidden">
                     <img
-                      src={event.image || "/placeholder.svg"}
-                      alt={event.title}
+                      src={event.image || (event.title === "Athletic Meet" ? "/athletic-meet.jpg" : "/placeholder.svg")}
+                      alt={event.title || "Event"}
                       className="h-48 w-full object-cover"
                     />
                     <CardHeader>
@@ -388,14 +445,62 @@ export default function EventsPage() {
 
             <TabsContent value="past" className="mt-0">
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {events.slice(2, 5).map((event) => (
+                {events.filter((event) => {
+                  // Parse event end date from event.eventdates (supports "May 4-6, 2025" or "May 15, 2025")
+const dateMatch = event.eventdates?.match(/([A-Za-z]+) (\d+)(?:-(\d+))?, (\d{4})/);
+if (!dateMatch) return false;
+const monthName = dateMatch[1];
+const startDay = parseInt(dateMatch[2], 10);
+const endDay = dateMatch[3] ? parseInt(dateMatch[3], 10) : startDay;
+const eventYear = parseInt(dateMatch[4], 10);
+const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const eventMonth = months.findIndex(m => m.toLowerCase() === monthName.toLowerCase());
+if (eventMonth === -1) return false;
+                  // Use the real current date
+const now = new Date();
+const todayDay = now.getDate();
+const todayMonth = now.getMonth(); // 0-indexed: 4 = May
+const todayYear = now.getFullYear();
+                  if (eventYear < todayYear) return true;
+if (eventYear > todayYear) return false;
+if (eventMonth < todayMonth) return true;
+if (eventMonth > todayMonth) return false;
+return endDay < todayDay;
+                }).length === 0 && (
+                  <div className="text-muted-foreground col-span-3 text-center py-8">No past events found.</div>
+                )}
+                {events.filter((event) => {
+                  // Parse event end date from event.eventdates (supports "May 4-6, 2025" or "May 15, 2025")
+const dateMatch = event.eventdates?.match(/([A-Za-z]+) (\d+)(?:-(\d+))?, (\d{4})/);
+if (!dateMatch) return false;
+const monthName = dateMatch[1];
+const startDay = parseInt(dateMatch[2], 10);
+const endDay = dateMatch[3] ? parseInt(dateMatch[3], 10) : startDay;
+const eventYear = parseInt(dateMatch[4], 10);
+const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const eventMonth = months.findIndex(m => m.toLowerCase() === monthName.toLowerCase());
+if (eventMonth === -1) return false;
+                  // Use the real current date
+const now = new Date();
+const todayDay = now.getDate();
+const todayMonth = now.getMonth(); // 0-indexed: 4 = May
+const todayYear = now.getFullYear();
+                  if (eventYear < todayYear) return true;
+if (eventYear > todayYear) return false;
+if (eventMonth < todayMonth) return true;
+if (eventMonth > todayMonth) return false;
+return endDay < todayDay;
+                }).map((event) => (
                   <Card key={event.id} className="overflow-hidden opacity-80">
                     <div className="relative">
                       <img
                         src={event.image || "/placeholder.svg"}
-                        alt={event.title}
+                        alt={event.title || "Event"}
                         className="h-48 w-full object-cover"
                       />
+                      <div className="absolute top-2 left-2 bg-primary text-primary-foreground rounded px-2 py-1 text-xs">
+                        {event.eventtype || "Type"}
+                      </div>
                       <div className="absolute inset-0 bg-background/50 flex items-center justify-center">
                         <Badge variant="secondary" className="text-lg py-1 px-3">
                           Completed
@@ -404,15 +509,26 @@ export default function EventsPage() {
                     </div>
                     <CardHeader>
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-base">{event.title}</CardTitle>
-                        <Badge variant="outline">{event.category}</Badge>
+                        <CardTitle className="text-base">{event.title || "Event Title"}</CardTitle>
+                        <Badge variant="outline">{event.collegename || "College"}</Badge>
                       </div>
-                      <CardDescription>{event.date}</CardDescription>
+                      <CardDescription>{event.eventdates || "Event Dates"}</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <MapPin className="h-4 w-4" />
-                        {event.location}
+                      <div className="flex flex-col gap-2 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-4 w-4" />
+                          {event.location || "Location not set"}
+                        </div>
+                        <div>
+                          <span className="font-medium">Description:</span> {event.content || "No description available."}
+                        </div>
+                        <div>
+                          <span className="font-medium">Team Size:</span> {event.members || "N/A"}
+                        </div>
+                        <div>
+                          <span className="font-medium">Prize:</span> ₹{event.prize || "N/A"}
+                        </div>
                       </div>
                     </CardContent>
                     <CardFooter className="flex justify-between">
@@ -423,12 +539,64 @@ export default function EventsPage() {
                 ))}
               </div>
             </TabsContent>
+
+            <TabsContent value="myteams" className="mt-0">
+              <div className="space-y-6">
+                <div className="flex justify-between">
+                  <h2 className="text-2xl font-bold">My Teams</h2>
+                  <Button>
+                    <Users className="mr-2 h-4 w-4" />
+                    Create New Team
+                  </Button>
+                </div>
+                {myTeams.map((team) => (
+                  <Card key={team.id}>
+                    <CardHeader>
+                      <div className="flex justify-between">
+                        <div>
+                          <CardTitle>{team.name}</CardTitle>
+                          <CardDescription>For {team.competition}</CardDescription>
+                        </div>
+                        <Badge variant={team.status === "Registered" ? "default" : "outline"}>{team.status}</Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <h3 className="font-medium">Team Members</h3>
+                        <div className="space-y-2">
+                          {team.members.map((member) => (
+                            <div key={member.name} className="flex items-center justify-between rounded-md border p-3">
+                              <div className="flex items-center gap-3">
+                                <Avatar>
+                                  <AvatarImage src={member.avatar || "/placeholder.svg"} alt={member.name} />
+                                  <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <p className="font-medium">{member.name}</p>
+                                  <p className="text-xs text-muted-foreground">{member.college}</p>
+                                </div>
+                              </div>
+                              {member.isLeader && <Badge variant="outline">Team Leader</Badge>}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </CardContent>
+                    <CardFooter className="flex justify-between">
+                      <Button variant="outline">Edit Team</Button>
+                      {team.status === "Pending" ? (
+                        <Button>Complete Registration</Button>
+                      ) : (
+                        <Button variant="outline">View Details</Button>
+                      )}
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
           </Tabs>
         </div>
-        <div className="mt-10">
-          <h2 className="font-semibold mb-2">Global Event Chatroom</h2>
-          <ChatRoom roomId="global" />
-        </div>
+        
       </main>
     </div>
   )

@@ -8,8 +8,8 @@ import SidebarConditional from "@/components/sidebar-conditional"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "CampusConnext",
-  description: "Bridging Colleges, Building Communities",
+  title: "Unyt",
+  description: "Bridging Colleges, Building Communities", // updated for Unyt
   generator: 'v0.dev'
 }
 

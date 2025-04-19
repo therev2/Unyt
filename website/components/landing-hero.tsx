@@ -10,7 +10,7 @@ export function LandingHero({ onLogin, onSignup }: { onLogin: () => void; onSign
         transition={{ duration: 0.9, ease: "easeOut" }}
         className="text-4xl md:text-6xl font-extrabold text-center bg-gradient-to-br from-primary to-blue-600 bg-clip-text text-transparent drop-shadow-lg"
       >
-        CampusConnext
+        Unyt
       </motion.h1>
       <motion.p
         initial={{ opacity: 0, y: 40 }}

@@ -121,7 +121,7 @@ export function CampusSidebar() {
             <AvatarImage src="/placeholder.svg?height=32&width=32" alt="Logo" />
             <AvatarFallback>CC</AvatarFallback>
           </Avatar>
-          <div className="font-semibold text-lg">CampusConnext</div>
+          <div className="font-semibold text-lg">Unyt</div>
         </div>
       </SidebarHeader>
 

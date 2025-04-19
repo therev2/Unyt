@@ -487,6 +487,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildChatroomTab() {
+    if (_isCollegeIdLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_collegeId == null) {
+      return const Center(child: Text('No college ID found.'));
+    }
+    final user = FirebaseAuth.instance.currentUser;
+    print('[_buildChatroomTab] _collegeId: \x1B[32m'+_collegeId.toString()+'\x1B[0m, user: \x1B[32m');
+    final TextEditingController _messageController = TextEditingController();
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -503,155 +512,97 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const SizedBox(height: 16),
           Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: Theme.of(context).dividerColor),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                children: [
-                  Expanded(
-                    child: ListView(
-                      padding: const EdgeInsets.all(16),
-                      children: [
-                        _buildChatMessage(
-                          'Rahul Sharma',
-                          'Has anyone started working on the OS assignment?',
-                          '10:30 AM',
-                          'https://via.placeholder.com/40x40',
-                          false,
-                        ),
-                        _buildChatMessage(
-                          'Priya Patel',
-                          'Yes, I\'ve started. It\'s quite challenging!',
-                          '10:32 AM',
-                          'https://via.placeholder.com/40x40',
-                          false,
-                        ),
-                        _buildChatMessage(
-                          'Me',
-                          'I can help you both. Let\'s meet in the library at 4 PM?',
-                          '10:35 AM',
-                          'https://via.placeholder.com/40x40',
-                          true,
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            decoration: InputDecoration(
-                              hintText: 'Type your message...',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(24),
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        FloatingActionButton(
-                          onPressed: () {
-                            // Send message
-                          },
-                          mini: true,
-                          child: const Icon(Icons.send),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('Colleges')
+                  .doc(_collegeId)
+                  .collection('ChatroomMessages')
+                  .orderBy('timestamp', descending: true)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (!snapshot.hasData) {
+                  print('[Chatroom StreamBuilder] No snapshot data');
+                  return const Center(child: Text('No messages yet.'));
+                }
+                // Filter out messages with null timestamp
+                final messages = snapshot.data!.docs.where((doc) => doc['timestamp'] != null).toList();
+                print('[Chatroom StreamBuilder] Messages count: \x1B[33m${messages.length}\x1B[0m');
+                if (messages.isEmpty) {
+                  return const Center(child: Text('No messages yet.'));
+                }
+                return ListView.builder(
+                  reverse: true,
+                  itemCount: messages.length,
+                  itemBuilder: (context, index) {
+                    final msg = messages[index].data() as Map<String, dynamic>;
+                    final isMe = msg['senderId'] == user?.uid;
+                    return ListTile(
+                      leading: isMe ? null : CircleAvatar(
+                        backgroundImage: msg['senderAvatar'] != null && msg['senderAvatar'] != ''
+                          ? NetworkImage(msg['senderAvatar'])
+                          : null,
+                        child: (msg['senderAvatar'] == null || msg['senderAvatar'] == '') ? const Icon(Icons.person) : null,
+                      ),
+                      trailing: isMe ? CircleAvatar(
+                        backgroundImage: msg['senderAvatar'] != null && msg['senderAvatar'] != ''
+                          ? NetworkImage(msg['senderAvatar'])
+                          : null,
+                        child: (msg['senderAvatar'] == null || msg['senderAvatar'] == '') ? const Icon(Icons.person) : null,
+                      ) : null,
+                      title: Text(msg['senderName'] ?? 'Unknown'),
+                      subtitle: Text(msg['text'] ?? ''),
+                      dense: true,
+                    );
+                  },
+                );
+              },
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildChatMessage(
-    String name,
-    String message,
-    String time,
-    String avatar,
-    bool isMe,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Row(
-        mainAxisAlignment:
-            isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (!isMe) ...[
-            CircleAvatar(backgroundImage: NetworkImage(avatar), radius: 16),
-            const SizedBox(width: 8),
-          ],
-          Container(
-            constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width * 0.6,
-            ),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color:
-                  isMe
-                      ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.surfaceVariant,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (!isMe)
-                  Text(
-                    name,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color:
-                          isMe
-                              ? Theme.of(context).colorScheme.onPrimary
-                              : Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                Text(
-                  message,
-                  style: TextStyle(
-                    color:
-                        isMe
-                            ? Theme.of(context).colorScheme.onPrimary
-                            : Theme.of(context).colorScheme.onSurfaceVariant,
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _messageController,
+                  decoration: const InputDecoration(
+                    hintText: 'Type your message...',
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  time,
-                  style: TextStyle(
-                    fontSize: 10,
-                    color:
-                        isMe
-                            ? Theme.of(
-                              context,
-                            ).colorScheme.onPrimary.withOpacity(0.7)
-                            : Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant.withOpacity(0.7),
-                  ),
-                  textAlign: TextAlign.right,
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                icon: const Icon(Icons.send),
+                onPressed: user == null || _collegeId == null
+                    ? null
+                    : () async {
+                        final text = _messageController.text.trim();
+                        if (text.isEmpty) return;
+                        // Fetch sender info (name, avatar)
+                        final studentDoc = await FirebaseFirestore.instance
+                            .collection('Students')
+                            .doc(user.uid)
+                            .get();
+                        final senderName = studentDoc.data()?['name'] ?? 'Unknown';
+                        final senderAvatar = studentDoc.data()?['avatar'] ?? '';
+                        print('[SendMessage] Sending message to collegeId: \x1B[36m$_collegeId\x1B[0m, sender: $senderName');
+                        await FirebaseFirestore.instance
+                            .collection('Colleges')
+                            .doc(_collegeId)
+                            .collection('ChatroomMessages')
+                            .add({
+                          'senderId': user.uid,
+                          'senderName': senderName,
+                          'senderAvatar': senderAvatar,
+                          'text': text,
+                          'timestamp': FieldValue.serverTimestamp(),
+                        });
+                        _messageController.clear();
+                      },
+              ),
+            ],
           ),
-          if (isMe) ...[
-            const SizedBox(width: 8),
-            CircleAvatar(backgroundImage: NetworkImage(avatar), radius: 16),
-          ],
         ],
       ),
     );

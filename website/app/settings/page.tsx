@@ -99,4 +99,21 @@ export default function SettingsPage() {
                           </div>
                           <div className="sm:w-2/3">
                             <Textarea
-                              id="bio"\
+                              id="bio"
+                              defaultValue="Student at NIT Trichy. Passionate about AI and hackathons."
+                              rows={3}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </div>
+            </div>
+          </Tabs>
+        </div>
+      </main>
+    </div>
+  )
+}

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:unyt/models/quiz.dart';
+import 'package:unyt/screens/quizzes/quiz_taking_screen.dart';
+import 'package:unyt/services/quiz_ai_service.dart';
 
 class QuizCard extends StatelessWidget {
   final Quiz quiz;
@@ -121,8 +123,45 @@ class QuizCard extends StatelessWidget {
             child: SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  // Start quiz
+                onPressed: () async {
+                  // Start quiz: generate questions using Gemini and navigate to QuizTakingScreen
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) => const Center(child: CircularProgressIndicator()),
+                  );
+                  try {
+                    final questions = await QuizAIService.generateQuestions(
+                      topic: quiz.title,
+                      count: quiz.questions,
+                      totalPoints: quiz.points,
+                    );
+                    Navigator.of(context).pop(); // Remove loading dialog
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => QuizTakingScreen(
+                          quiz: quiz,
+                          questions: questions,
+                          timeLimitSeconds: quiz.timeLimit * 60,
+                        ),
+                      ),
+                    );
+                  } catch (e) {
+                    Navigator.of(context).pop();
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Error'),
+                        content: Text('Failed to generate questions. Please try again.\n$e'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
                 },
                 child: const Text('Start Quiz'),
               ),

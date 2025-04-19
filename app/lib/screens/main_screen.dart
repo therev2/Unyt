@@ -7,6 +7,7 @@ import 'package:unyt/screens/forums/forums_screen.dart';
 import 'package:unyt/screens/leaderboards/leaderboards_screen.dart';
 import 'package:unyt/screens/profile/profile_screen.dart';
 import 'package:unyt/screens/settings/settings_screen.dart';
+import 'package:unyt/screens/resources/resources_screen.dart';
 import 'package:unyt/widgets/navigation/campus_drawer.dart';
 import 'package:provider/provider.dart';
 import 'package:unyt/providers/auth_provider.dart';
@@ -93,6 +94,10 @@ class _MainScreenState extends State<MainScreen> {
         onLeaderboardsPressed: () => _onMainNavItemTapped(5),
         onProfilePressed: () => _onMainNavItemTapped(6),
         onSettingsPressed: () => _navigateToScreen(const SettingsScreen(), 'Settings'),
+        onResourcesPressed: () => _navigateToScreen(
+          const ResourcesScreen(),
+          'Resources',
+        ),
         userName: authProvider.username ?? 'User',
         userEmail: authProvider.email ?? 'user@example.com',
         userCollege: 'College',

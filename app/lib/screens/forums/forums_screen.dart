@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:unyt/models/forum_topic.dart';
 import 'package:unyt/widgets/forums/topic_card.dart';
 
@@ -13,100 +14,87 @@ class _ForumsScreenState extends State<ForumsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
+  int _selectedTabIndex = 0;
 
-  // Sample data - in a real app, this would come from your API
-  final List<ForumTopic> topics = [
-    ForumTopic(
-      id: 1,
-      title: 'Tips for Semester Exams',
-      description:
-          'Share your study tips and strategies for the upcoming semester exams.',
-      category: 'Academics',
-      author: ForumAuthor(
-        name: 'Rahul Sharma',
-        college: 'NIT Trichy',
-        avatar: 'https://via.placeholder.com/40x40',
-      ),
-      createdAt: '2 days ago',
-      lastActivity: '3 hours ago',
-      views: 342,
-      replies: 28,
-      isSticky: true,
-    ),
-    ForumTopic(
-      id: 2,
-      title: 'Campus Placement Preparation',
-      description:
-          'Discussion on how to prepare for campus placements and interviews.',
-      category: 'Career',
-      author: ForumAuthor(
-        name: 'Priya Patel',
-        college: 'IIT Bombay',
-        avatar: 'https://via.placeholder.com/40x40',
-      ),
-      createdAt: '1 week ago',
-      lastActivity: '1 day ago',
-      views: 520,
-      replies: 45,
-      isSticky: false,
-    ),
-    ForumTopic(
-      id: 3,
-      title: 'Best Coding Bootcamps',
-      description:
-          'Recommendations for coding bootcamps and online courses for skill development.',
-      category: 'Technology',
-      author: ForumAuthor(
-        name: 'Amit Kumar',
-        college: 'BITS Pilani',
-        avatar: 'https://via.placeholder.com/40x40',
-      ),
-      createdAt: '3 days ago',
-      lastActivity: '12 hours ago',
-      views: 210,
-      replies: 15,
-      isSticky: false,
-    ),
-    ForumTopic(
-      id: 4,
-      title: 'Hostel Life Hacks',
-      description:
-          'Share your tips and tricks for making hostel life more comfortable and enjoyable.',
-      category: 'Campus Life',
-      author: ForumAuthor(
-        name: 'Sneha Gupta',
-        college: 'Delhi University',
-        avatar: 'https://via.placeholder.com/40x40',
-      ),
-      createdAt: '5 days ago',
-      lastActivity: '2 days ago',
-      views: 430,
-      replies: 32,
-      isSticky: false,
-    ),
-    ForumTopic(
-      id: 5,
-      title: 'Internship Opportunities Summer 2023',
-      description:
-          'Discussion on internship opportunities for the summer of 2023.',
-      category: 'Career',
-      author: ForumAuthor(
-        name: 'Rajesh Singh',
-        college: 'IIM Ahmedabad',
-        avatar: 'https://via.placeholder.com/40x40',
-      ),
-      createdAt: '1 week ago',
-      lastActivity: '3 days ago',
-      views: 650,
-      replies: 48,
-      isSticky: true,
-    ),
-  ];
+  // Fetch topics from Firestore
+  Stream<List<ForumTopic>> getTopicsStream() {
+    return FirebaseFirestore.instance
+        .collection('Discussion')
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) {
+              final data = doc.data();
+              return ForumTopic(
+                id: int.tryParse(doc.id) ?? 0,
+                title: data['title'] ?? '',
+                description: data['description'] ?? '',
+                category: data['category'] ?? '',
+                author: ForumAuthor(
+                  name: data['author']['name'] ?? '',
+                  college: data['author']['college'] ?? '',
+                  avatar: data['author']['avatar'] ?? '',
+                ),
+                createdAt: data['createdAt'] ?? '',
+                lastActivity: data['lastActivity'] ?? '',
+                views: data['views'] ?? 0,
+                replies: data['replies'] ?? 0,
+                isSticky: data['isSticky'] ?? false,
+                upvotes: data['upvotes'] ?? 0,
+                upvotedBy: List<String>.from(data['upvotedBy'] ?? []),
+              );
+            }).toList().cast<ForumTopic>());
+  }
+
+  // Helper to fetch the number of topics and posts (replies)
+  Stream<Map<String, int>> getForumStatsStream() {
+    return FirebaseFirestore.instance.collection('Discussion').snapshots().map((snapshot) {
+      int topicCount = snapshot.docs.length;
+      int postCount = 0;
+      for (final doc in snapshot.docs) {
+        final data = doc.data();
+        final replies = data['replies'];
+        postCount += (replies is int ? replies : (replies is num ? replies.toInt() : 0)) + 1;
+      }
+      return {
+        'topics': topicCount,
+        'posts': postCount,
+      };
+    });
+  }
+
+  // Helper to get the category for each tab
+  String? _getCategoryForTab(int index) {
+    switch (index) {
+      case 1:
+        return 'Academics';
+      case 2:
+        return 'Career';
+      case 3:
+        return 'Technology';
+      case 4:
+        return 'Campus Life';
+      default:
+        return null; // All
+    }
+  }
+
+  // Filter topics by category
+  List<ForumTopic> _filterTopicsByCategory(List<ForumTopic> topics, int tabIndex) {
+    final category = _getCategoryForTab(tabIndex);
+    if (category == null) return topics;
+    return topics.where((topic) => topic.category == category).toList();
+  }
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 5, vsync: this);
+    _tabController.addListener(() {
+      if (_tabController.indexIsChanging) {
+        setState(() {
+          _selectedTabIndex = _tabController.index;
+        });
+      }
+    });
   }
 
   @override
@@ -118,95 +106,92 @@ class _ForumsScreenState extends State<ForumsScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // TabBar
-        TabBar(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Discussion Forum'),
+        bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
           tabs: const [
-            Tab(text: 'All Topics'),
+            Tab(text: 'All'),
             Tab(text: 'Academics'),
             Tab(text: 'Career'),
             Tab(text: 'Technology'),
             Tab(text: 'Campus Life'),
           ],
         ),
-        // Search Bar
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: TextField(
-            controller: _searchController,
-            decoration: InputDecoration(
-              hintText: 'Search topics...',
-              prefixIcon: const Icon(Icons.search),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              contentPadding: const EdgeInsets.symmetric(vertical: 0),
-              filled: true,
-              fillColor: Theme.of(
-                context,
-              ).colorScheme.surfaceVariant.withOpacity(0.3),
-            ),
-          ),
-        ),
-
-        // Forum Stats
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildStatItem(context, '120', 'Topics'),
-                  _buildStatItem(context, '3.5K', 'Posts'),
-                  _buildStatItem(context, '12.8K', 'Members'),
-                  _buildStatItem(context, '450', 'Online'),
-                ],
+      ),
+      body: Column(
+        children: [
+          // Search Bar
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search topics...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                filled: true,
+                fillColor: Theme.of(
+                  context,
+                ).colorScheme.surfaceVariant.withOpacity(0.3),
               ),
             ),
           ),
-        ),
 
-        // Topics List
-        Expanded(
-          child: TabBarView(
-            controller: _tabController,
-            children: [
-              // All Topics Tab
-              _buildTopicsList(topics),
-
-              // Academics Tab
-              _buildTopicsList(
-                topics.where((topic) => topic.category == 'Academics').toList(),
-              ),
-
-              // Career Tab
-              _buildTopicsList(
-                topics.where((topic) => topic.category == 'Career').toList(),
-              ),
-
-              // Technology Tab
-              _buildTopicsList(
-                topics
-                    .where((topic) => topic.category == 'Technology')
-                    .toList(),
-              ),
-
-              // Campus Life Tab
-              _buildTopicsList(
-                topics
-                    .where((topic) => topic.category == 'Campus Life')
-                    .toList(),
-              ),
-            ],
+          // Forum Stats
+          StreamBuilder<Map<String, int>>(
+            stream: getForumStatsStream(),
+            builder: (context, snapshot) {
+              final stats = snapshot.data ?? {'topics': 0, 'posts': 0};
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _buildStatItem(context, stats['topics'].toString(), 'Topics'),
+                        _buildStatItem(context, stats['posts'].toString(), 'Posts'),
+                        _buildStatItem(context, '12.8K', 'Members'),
+                        _buildStatItem(context, '450', 'Online'),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
-        ),
-      ],
-      // FloatingActionButton will be handled by the parent Scaffold if needed
+
+          // Topics List
+          Expanded(
+            child: StreamBuilder<List<ForumTopic>>(
+              stream: getTopicsStream(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text('No topics yet.'));
+                }
+                final topics = _filterTopicsByCategory(snapshot.data!, _selectedTabIndex);
+                return ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: topics.length,
+                  itemBuilder: (context, index) {
+                    return TopicCard(topic: topics[index]);
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -222,16 +207,6 @@ class _ForumsScreenState extends State<ForumsScreen>
         ),
         Text(label, style: Theme.of(context).textTheme.bodySmall),
       ],
-    );
-  }
-
-  Widget _buildTopicsList(List<ForumTopic> topicsList) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: topicsList.length,
-      itemBuilder: (context, index) {
-        return TopicCard(topic: topicsList[index]);
-      },
     );
   }
 }

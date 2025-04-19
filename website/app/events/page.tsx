@@ -129,6 +129,8 @@ const calendarDays = [
   { date: 31, events: 0 },
 ]
 
+import ChatRoom from "@/components/ChatRoom";
+
 export default function EventsPage() {
   return (
     <div className="flex flex-col min-h-screen">
@@ -422,6 +424,10 @@ export default function EventsPage() {
               </div>
             </TabsContent>
           </Tabs>
+        </div>
+        <div className="mt-10">
+          <h2 className="font-semibold mb-2">Global Event Chatroom</h2>
+          <ChatRoom roomId="global" />
         </div>
       </main>
     </div>

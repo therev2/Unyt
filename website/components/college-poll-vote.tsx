@@ -37,7 +37,12 @@ export default function CollegePollVote({ poll, collegeId, onVoted }: CollegePol
       const optionIdx = poll.options.findIndex((o: PollOption) => o.id === selected);
       if (optionIdx === -1) throw new Error("Invalid option");
       const voterKey = `voters.${userData.uid}`;
-      const pollRef = doc(db, `Colleges/${collegeId}/Polls/${poll.id}`);
+      let pollRef;
+      if (collegeId === "Global") {
+        pollRef = doc(db, `GlobalPolls/${poll.id}`);
+      } else {
+        pollRef = doc(db, `Colleges/${collegeId}/Polls/${poll.id}`);
+      }
       // Update the entire options array to preserve all fields
       const newOptions = poll.options.map((opt: PollOption, idx: number) =>
         idx === optionIdx ? { ...opt, votes: opt.votes + 1 } : opt

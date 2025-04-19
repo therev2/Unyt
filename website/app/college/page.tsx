@@ -1,3 +1,5 @@
+"use client";
+
 import { Bell, Calendar, MessageCircle, PlusCircle, ThumbsUp, Vote } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -125,7 +127,11 @@ const bulletins = [
   },
 ]
 
+import ChatRoom from "@/components/ChatRoom";
+import { useUserProfile } from "@/components/useUserProfile";
+
 export default function CollegePage() {
+  const { userData, loading, error } = useUserProfile();
   return (
     <div className="flex flex-col min-h-screen">
       <header className="flex h-16 items-center gap-4 border-b bg-background px-6">
@@ -280,58 +286,17 @@ export default function CollegePage() {
 
             {/* Chatroom Tab */}
             <TabsContent value="chatroom" className="mt-6">
-              <Card className="h-[calc(100vh-16rem)]">
-                <CardHeader>
-                  <CardTitle>College Chatroom</CardTitle>
-                  <CardDescription>Chat with your college mates</CardDescription>
-                </CardHeader>
-                <CardContent className="h-[calc(100%-12rem)] overflow-y-auto border-y p-4">
-                  <div className="space-y-4">
-                    <div className="flex gap-3">
-                      <Avatar>
-                        <AvatarImage src="/placeholder.svg?height=40&width=40" />
-                        <AvatarFallback>RS</AvatarFallback>
-                      </Avatar>
-                      <div className="rounded-lg bg-muted p-3">
-                        <p className="font-semibold">Rahul Sharma</p>
-                        <p>Has anyone started working on the OS assignment?</p>
-                        <p className="mt-1 text-xs text-muted-foreground">10:30 AM</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-3">
-                      <Avatar>
-                        <AvatarImage src="/placeholder.svg?height=40&width=40" />
-                        <AvatarFallback>PP</AvatarFallback>
-                      </Avatar>
-                      <div className="rounded-lg bg-muted p-3">
-                        <p className="font-semibold">Priya Patel</p>
-                        <p>Yes, I've started. It's quite challenging!</p>
-                        <p className="mt-1 text-xs text-muted-foreground">10:32 AM</p>
-                      </div>
-                    </div>
-                    <div className="flex justify-end gap-3">
-                      <div className="rounded-lg bg-primary p-3 text-primary-foreground">
-                        <p>I can help you both. Let's meet in the library at 4 PM?</p>
-                        <p className="mt-1 text-xs opacity-70">10:35 AM</p>
-                      </div>
-                      <Avatar>
-                        <AvatarImage src="/placeholder.svg?height=40&width=40" />
-                        <AvatarFallback>ME</AvatarFallback>
-                      </Avatar>
-                    </div>
-                  </div>
-                </CardContent>
-                <CardFooter className="p-4">
-                  <div className="flex w-full gap-2">
-                    <input
-                      type="text"
-                      placeholder="Type your message..."
-                      className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
-                    />
-                    <Button>Send</Button>
-                  </div>
-                </CardFooter>
-              </Card>
+              {loading ? (
+                <div>Loading chatroom…</div>
+              ) : error || !userData?.college ? (
+                <div className="text-red-500 text-sm">
+                  Unable to load college chatroom<br />
+                  College value: {userData?.college || "undefined"}<br />
+                  Error: {error}
+                </div>
+              ) : (
+                <ChatRoom roomId={userData.college} />
+              )}
             </TabsContent>
 
             {/* Bulletin Tab */}
@@ -383,6 +348,7 @@ export default function CollegePage() {
           </Tabs>
         </div>
       </main>
+
     </div>
   )
 }

@@ -46,15 +46,7 @@ interface NavItem {
   isActive?: boolean
 }
 
-// Sample user data - in a real app, this would come from your auth system
-const userData = {
-  name: "Alex Johnson",
-  email: "alex@nit.edu.in",
-  college: "NIT Trichy",
-  year: "3rd Year",
-  branch: "Computer Science",
-  avatar: "/placeholder.svg?height=40&width=40",
-}
+import { useUserProfile } from "@/components/useUserProfile";
 
 // Main navigation items
 const mainNavItems: NavItem[] = [
@@ -100,6 +92,7 @@ const featureNavItems: NavItem[] = [
 ]
 
 export function CampusSidebar() {
+  const { userData, loading, error } = useUserProfile();
   const pathname = usePathname()
 
   // Set active state based on current path
@@ -194,50 +187,65 @@ export function CampusSidebar() {
 
       <SidebarFooter className="p-4">
         <div className="flex flex-col gap-4">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="w-full justify-start px-2">
-                <div className="flex items-center gap-2">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={userData.avatar || "/placeholder.svg"} alt={userData.name} />
-                    <AvatarFallback>{userData.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col items-start text-sm">
-                    <span className="font-medium">{userData.name}</span>
-                    <span className="text-xs text-muted-foreground">{userData.college}</span>
+          {loading ? (
+            <div className="flex items-center gap-2 animate-pulse">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={"/placeholder.svg"} alt="Loading" />
+                <AvatarFallback>?</AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col items-start text-sm">
+                <span className="font-medium bg-muted rounded w-20 h-4" />
+                <span className="text-xs text-muted-foreground bg-muted rounded w-28 h-3 mt-1" />
+              </div>
+            </div>
+          ) : error ? (
+            <div className="text-xs text-red-500">Failed to load profile</div>
+          ) : userData ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="w-full justify-start px-2">
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={userData.avatar || "/placeholder.svg"} alt={userData.name || "User"} />
+                      <AvatarFallback>{(userData.name || "?").charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col items-start text-sm">
+                      <span className="font-medium">{userData.name || userData.username || "User"}</span>
+                      <span className="text-xs text-muted-foreground">{userData.college || "-"}</span>
+                    </div>
+                  </div>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <div className="px-2 py-1.5">
+                  <div className="text-xs font-medium">{userData.email}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {(userData.year || "")} {userData.year && userData.branch ? "•" : null} {userData.branch || ""}
                   </div>
                 </div>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <div className="px-2 py-1.5">
-                <div className="text-xs font-medium">{userData.email}</div>
-                <div className="text-xs text-muted-foreground">
-                  {userData.year} • {userData.branch}
-                </div>
-              </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <a href="/profile">
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Profile</span>
-                </a>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <a href="/settings">
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
-                </a>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <a href="/profile">
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </a>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <a href="/settings">
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                  </a>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : null}
 
           <div className="flex items-center justify-between">
             <ThemeToggle />

@@ -1,3 +1,5 @@
+"use client";
+
 import { Bell, Calendar, MessageCircle, PlusCircle, ThumbsUp, Vote } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -6,65 +8,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-
-// Sample data - in a real app, this would come from your database
-const notices = [
-  {
-    id: 1,
-    title: "Semester Registration Deadline",
-    content:
-      "All students must complete their semester registration by April 30th. Late registrations will incur a penalty fee.",
-    date: "Apr 20, 2023",
-    author: "Academic Office",
-    important: true,
-  },
-  {
-    id: 2,
-    title: "Campus Wi-Fi Maintenance",
-    content: "The campus Wi-Fi network will be down for maintenance on Saturday from 2 AM to 5 AM.",
-    date: "Apr 18, 2023",
-    author: "IT Department",
-    important: false,
-  },
-  {
-    id: 3,
-    title: "Library Extended Hours",
-    content: "The central library will remain open until midnight during the exam period (May 1-15).",
-    date: "Apr 15, 2023",
-    author: "Library",
-    important: false,
-  },
-]
-
-const events = [
-  {
-    id: 1,
-    title: "Annual Tech Fest",
-    description: "Join us for the biggest tech festival of the year with workshops, competitions, and guest lectures.",
-    date: "May 15-17, 2023",
-    location: "Main Auditorium",
-    image: "/placeholder.svg?height=100&width=200",
-    organizer: "Technical Club",
-  },
-  {
-    id: 2,
-    title: "Career Fair 2023",
-    description: "Meet recruiters from over 50 companies. Bring your resume and dress professionally.",
-    date: "May 5, 2023",
-    location: "Convention Center",
-    image: "/placeholder.svg?height=100&width=200",
-    organizer: "Placement Cell",
-  },
-  {
-    id: 3,
-    title: "Cultural Night",
-    description: "An evening of music, dance, and drama performances by students.",
-    date: "Apr 28, 2023",
-    location: "Open Air Theater",
-    image: "/placeholder.svg?height=100&width=200",
-    organizer: "Cultural Committee",
-  },
-]
+import { db } from "@/lib/firebase";
+import { collection, onSnapshot, query, orderBy, addDoc } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import BulletinPostDialog from "@/components/bulletin-post-dialog";
+import CollegePollVote from "@/components/college-poll-vote";
 
 const polls = [
   {
@@ -128,7 +76,125 @@ const bulletins = [
 
 import ChatRoom from "@/components/ChatRoom";
 
+function useGlobalNotices() {
+  const [notices, setNotices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>("");
+
+  useEffect(() => {
+    setLoading(true);
+    setError("");
+    const q = query(collection(db, "GlobalNotices"), orderBy("datetime", "desc"));
+    const unsub = onSnapshot(
+      q,
+      (snapshot) => {
+        setNotices(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        setLoading(false);
+      },
+      (err) => {
+        setError("Failed to load notices: " + err.message);
+        setLoading(false);
+      }
+    );
+    return unsub;
+  }, []);
+
+  return { notices, loading, error };
+}
+
+function useGlobalEvents() {
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>("");
+
+  useEffect(() => {
+    setLoading(true);
+    setError("");
+    const q = query(collection(db, "GlobalEvents"), orderBy("datetime", "desc"));
+    const unsub = onSnapshot(
+      q,
+      (snapshot) => {
+        setEvents(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        setLoading(false);
+      },
+      (err) => {
+        setError("Failed to load events: " + err.message);
+        setLoading(false);
+      }
+    );
+    return unsub;
+  }, []);
+
+  return { events, loading, error };
+}
+
+function useGlobalBulletin() {
+  const [bulletins, setBulletins] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>("");
+
+  useEffect(() => {
+    setLoading(true);
+    setError("");
+    const q = query(collection(db, "GlobalBulletin"), orderBy("datetime", "desc"));
+    const unsub = onSnapshot(
+      q,
+      (snapshot) => {
+        setBulletins(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        setLoading(false);
+      },
+      (err) => {
+        setError("Failed to load bulletin: " + err.message);
+        setLoading(false);
+      }
+    );
+    return unsub;
+  }, []);
+
+  return { bulletins, loading, error };
+}
+
+function useGlobalPolls(pollsRefreshKey: number) {
+  const [polls, setPolls] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    const q = query(collection(db, "GlobalPolls"), orderBy("endDate", "desc"));
+    const unsub = onSnapshot(q, (snapshot) => {
+      const fetched: any[] = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        fetched.push({
+          id: doc.id,
+          question: data.question ?? '',
+          options: Array.isArray(data.options) ? data.options : [],
+          totalVotes: data.totalVotes ?? data.options?.reduce((acc:number, o:any) => acc + (o.votes || 0), 0) ?? 0,
+          endDate: data.endDate ?? '',
+          voters: data.voters ?? {},
+        });
+      });
+      setPolls(fetched);
+      setLoading(false);
+    }, (err) => {
+      setError(err.message);
+      setLoading(false);
+    });
+    return unsub;
+  }, [pollsRefreshKey]);
+
+  return { polls, loading, error };
+}
+
 export default function GlobalFeedPage() {
+  const { notices, loading: noticesLoading, error: noticesError } = useGlobalNotices();
+  const { events, loading: eventsLoading, error: eventsError } = useGlobalEvents();
+  const { bulletins: globalBulletins, loading: globalBulletinLoading, error: globalBulletinError } = useGlobalBulletin();
+  const [pollsRefreshKey, setPollsRefreshKey] = useState(0);
+  const { polls: globalPolls, loading: globalPollsLoading, error: globalPollsError } = useGlobalPolls(pollsRefreshKey);
+
   return (
     <div className="flex flex-col min-h-screen">
       <header className="flex h-16 items-center gap-4 border-b bg-background px-6">
@@ -177,108 +243,139 @@ export default function GlobalFeedPage() {
                 <h2 className="text-2xl font-bold">Global Notices</h2>
                 <Button>
                   <Bell className="mr-2 h-4 w-4" />
-                  Subscribe to Notifications
+                  Post Notice
                 </Button>
               </div>
               <div className="grid gap-6">
-                {notices.map((notice) => (
-                  <Card key={notice.id}>
-                    <CardHeader className="pb-3">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <CardTitle className="text-lg">{notice.title}</CardTitle>
+                {noticesLoading ? (
+                  <div className="text-muted-foreground text-center">Loading notices...</div>
+                ) : noticesError ? (
+                  <div className="text-red-500 text-center">{noticesError}</div>
+                ) : notices.length === 0 ? (
+                  <div className="text-muted-foreground text-center">No notices yet.</div>
+                ) : (
+                  notices.map((notice) => {
+                    // Format date (no time)
+                    let dateStr = "";
+                    if (notice.datetime) {
+                      try {
+                        if (typeof notice.datetime.toDate === 'function') {
+                          const d = notice.datetime.toDate();
+                          dateStr = d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+                        } else {
+                          dateStr = new Date(notice.datetime).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+                        }
+                      } catch {
+                        dateStr = String(notice.datetime);
+                      }
+                    }
+                    return (
+                      <Card key={notice.id}>
+                        <CardHeader>
+                          <CardTitle>{notice.title}</CardTitle>
                           <CardDescription>
-                            Posted by {notice.author} • {notice.date}
+                            {notice.collegename ? `By ${notice.collegename}` : null}
+                            {dateStr ? ` • ${dateStr}` : null}
                           </CardDescription>
-                        </div>
-                        {notice.important && <Badge variant="destructive">Important</Badge>}
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <p>{notice.content}</p>
-                    </CardContent>
-                  </Card>
-                ))}
+                        </CardHeader>
+                        <CardContent>
+                          <p>{notice.content}</p>
+                        </CardContent>
+                      </Card>
+                    );
+                  })
+                )}
               </div>
             </TabsContent>
 
             {/* Events Tab */}
             <TabsContent value="events" className="mt-6">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold">Upcoming Events</h2>
+                <h2 className="text-2xl font-bold">Global Events</h2>
                 <Button>
                   <Calendar className="mr-2 h-4 w-4" />
                   Add to Calendar
                 </Button>
               </div>
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {events.map((event) => (
-                  <Card key={event.id} className="overflow-hidden">
-                    <img
-                      src={event.image || "/placeholder.svg"}
-                      alt={event.title}
-                      className="w-full h-40 object-cover"
-                    />
-                    <CardHeader>
-                      <CardTitle>{event.title}</CardTitle>
-                      <CardDescription>
-                        {event.date} • {event.location}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm">{event.description}</p>
-                    </CardContent>
-                    <CardFooter className="flex justify-between">
-                      <p className="text-sm text-muted-foreground">By {event.organizer}</p>
-                      <Button size="sm">Register</Button>
-                    </CardFooter>
-                  </Card>
-                ))}
-              </div>
+              {eventsLoading ? (
+                <div className="text-muted-foreground text-center">Loading events...</div>
+              ) : eventsError ? (
+                <div className="text-red-500 text-center">{eventsError}</div>
+              ) : events.length === 0 ? (
+                <div className="text-muted-foreground text-center">No events yet.</div>
+              ) : (
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {events.map((event) => {
+                    // Format date (no time)
+                    let dateStr = "";
+                    if (event.datetime) {
+                      try {
+                        if (typeof event.datetime.toDate === 'function') {
+                          const d = event.datetime.toDate();
+                          dateStr = d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+                        } else {
+                          dateStr = new Date(event.datetime).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+                        }
+                      } catch {
+                        dateStr = String(event.datetime);
+                      }
+                    }
+                    const imageUrl = event.image && typeof event.image === 'string' && event.image.trim() !== ''
+                      ? event.image
+                      : '/placeholder.svg?height=100&width=200';
+                    return (
+                      <Card key={event.id} className="overflow-hidden">
+                        <img
+                          src={imageUrl}
+                          alt={event.title || "Event image"}
+                          className="w-full h-40 object-cover bg-muted"
+                          onError={(e) => { e.currentTarget.src = "/placeholder.svg?height=100&width=200"; }}
+                        />
+                        <CardHeader>
+                          <CardTitle>{event.title}</CardTitle>
+                          <CardDescription>
+                            {event.collegename ? `By ${event.collegename}` : null}
+                            {dateStr ? ` • ${dateStr}` : null}
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <p>{event.content}</p>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
             </TabsContent>
 
             {/* Polls Tab */}
             <TabsContent value="polls" className="mt-6">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold">Active Polls</h2>
-                <Button>
-                  <Vote className="mr-2 h-4 w-4" />
-                  Create Poll
-                </Button>
+                <h2 className="text-2xl font-bold">Global Polls</h2>
               </div>
-              <div className="grid gap-6">
-                {polls.map((poll) => (
-                  <Card key={poll.id}>
-                    <CardHeader>
-                      <CardTitle>{poll.question}</CardTitle>
-                      <CardDescription>
-                        {poll.totalVotes} votes • Ends on {poll.endDate}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        {poll.options.map((option) => {
-                          const percentage = Math.round((option.votes / poll.totalVotes) * 100)
-                          return (
-                            <div key={option.id} className="space-y-2">
-                              <div className="flex justify-between">
-                                <span>{option.text}</span>
-                                <span>{percentage}%</span>
-                              </div>
-                              <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
-                                <div className="h-full bg-primary" style={{ width: `${percentage}%` }} />
-                              </div>
-                            </div>
-                          )
-                        })}
-                      </div>
-                    </CardContent>
-                    <CardFooter>
-                      <Button className="w-full">Vote Now</Button>
-                    </CardFooter>
-                  </Card>
-                ))}
-              </div>
+              {globalPollsLoading ? (
+                <div className="text-muted-foreground text-center">Loading polls…</div>
+              ) : globalPollsError ? (
+                <div className="text-red-500 text-center">{globalPollsError}</div>
+              ) : globalPolls.length === 0 ? (
+                <div className="text-muted-foreground text-center">No polls yet.</div>
+              ) : (
+                <div className="grid gap-6">
+                  {globalPolls.map((poll) => (
+                    <Card key={poll.id}>
+                      <CardHeader>
+                        <CardTitle>{poll.question}</CardTitle>
+                        <CardDescription>
+                          {poll.totalVotes} votes • Ends on {poll.endDate}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <CollegePollVote poll={poll} collegeId={"Global"} onVoted={() => setPollsRefreshKey((k) => k + 1)} />
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </TabsContent>
 
             {/* Chatroom Tab */}
@@ -289,48 +386,78 @@ export default function GlobalFeedPage() {
             {/* Bulletin Tab */}
             <TabsContent value="bulletin" className="mt-6">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold">Student Bulletin Board</h2>
-                <Button>
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Post to Bulletin
-                </Button>
+                <h2 className="text-2xl font-bold">Global Bulletin Board</h2>
+                <BulletinPostDialog
+                  trigger={
+                    <Button>
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      Post to Bulletin
+                    </Button>
+                  }
+                  onSubmit={async (data) => {
+                    // Adapt to GlobalBulletin schema
+                    await addDoc(collection(db, "GlobalBulletin"), {
+                      title: data.title,
+                      content: data.content,
+                      author_name: data.author_name || "Anonymous",
+                      author_avatar: data.author_avatar || "",
+                      datetime: new Date(),
+                    });
+                  }}
+                  defaultAuthorName={"Anonymous"}
+                  defaultAuthorAvatar={""}
+                />
               </div>
-              <div className="grid gap-6">
-                {bulletins.map((bulletin) => (
-                  <Card key={bulletin.id}>
-                    <CardHeader>
-                      <div className="flex items-center gap-3">
-                        <Avatar>
-                          <AvatarImage src={bulletin.author.avatar || "/placeholder.svg"} alt={bulletin.author.name} />
-                          <AvatarFallback>{bulletin.author.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <CardTitle className="text-base">{bulletin.title}</CardTitle>
-                          <CardDescription>
-                            Posted by {bulletin.author.name} • {bulletin.date}
-                          </CardDescription>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <p>{bulletin.content}</p>
-                    </CardContent>
-                    <CardFooter className="flex justify-between">
-                      <Button variant="ghost" size="sm">
-                        <ThumbsUp className="mr-2 h-4 w-4" />
-                        Like
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <MessageCircle className="mr-2 h-4 w-4" />
-                        Comment
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        Share
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                ))}
-              </div>
+              {globalBulletinLoading ? (
+                <div className="text-muted-foreground text-center">Loading bulletin…</div>
+              ) : globalBulletinError ? (
+                <div className="text-red-500 text-center">{globalBulletinError}</div>
+              ) : globalBulletins.length === 0 ? (
+                <div className="text-muted-foreground text-center">No bulletin posts yet.</div>
+              ) : (
+                <div className="grid gap-6">
+                  {globalBulletins.map((bulletin) => {
+                    // Format date (no time)
+                    let dateStr = "";
+                    if (bulletin.datetime) {
+                      try {
+                        if (typeof bulletin.datetime.toDate === 'function') {
+                          const d = bulletin.datetime.toDate();
+                          dateStr = d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+                        } else {
+                          dateStr = new Date(bulletin.datetime).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+                        }
+                      } catch {
+                        dateStr = String(bulletin.datetime);
+                      }
+                    }
+                    const avatarUrl = bulletin.author_avatar && typeof bulletin.author_avatar === 'string' && bulletin.author_avatar.trim() !== ''
+                      ? bulletin.author_avatar
+                      : '/placeholder.svg?height=40&width=40';
+                    return (
+                      <Card key={bulletin.id}>
+                        <CardHeader>
+                          <div className="flex items-center gap-3">
+                            <Avatar>
+                              <AvatarImage src={avatarUrl} alt={bulletin.author_name || 'Avatar'} />
+                              <AvatarFallback>{bulletin.author_name ? bulletin.author_name.charAt(0) : '?'}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <CardTitle className="text-base">{bulletin.title}</CardTitle>
+                              <CardDescription>
+                                Posted by {bulletin.author_name || 'Unknown'}{dateStr ? ` • ${dateStr}` : ''}
+                              </CardDescription>
+                            </div>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <p>{bulletin.content}</p>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         </div>

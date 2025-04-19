@@ -1,16 +1,17 @@
 "use client"
 import {
   Award,
+  BrainCircuit,
   Calendar,
+  Globe,
+  LogOut,
   MessageSquare,
   School,
   Settings,
+  Sparkles,
   Trophy,
-  Globe,
   type LucideIcon,
   User,
-  LogOut,
-  BrainCircuit,
 } from "lucide-react"
 import { usePathname } from "next/navigation"
 import {
@@ -91,6 +92,11 @@ const featureNavItems: NavItem[] = [
     title: "Leaderboards",
     href: "/leaderboards",
     icon: Award,
+  },
+  {
+    title: "Ask Buddy",
+    href: "/chatbot",
+    icon: Sparkles,
   },
 ]
 

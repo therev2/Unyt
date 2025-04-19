@@ -6,6 +6,7 @@ import 'package:unyt/widgets/home/bulletin_card.dart';
 import 'package:unyt/models/notice.dart';
 import 'package:unyt/models/event.dart';
 import 'package:unyt/models/poll.dart';
+import 'package:unyt/services/global_poll_admin_service.dart';
 import 'package:unyt/models/bulletin.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -389,8 +390,11 @@ class _GlobalFeedScreenState extends State<GlobalFeedScreen> {
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               ElevatedButton.icon(
-                onPressed: () {
-                  // Create poll
+                onPressed: () async {
+                  await GlobalPollAdminService.createSampleGlobalPolls();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Sample global polls created!')),
+                  );
                 },
                 icon: const Icon(Icons.add),
                 label: const Text('Create Poll'),
@@ -404,13 +408,40 @@ class _GlobalFeedScreenState extends State<GlobalFeedScreen> {
           ),
           const SizedBox(height: 16),
           Expanded(
-            child: ListView.builder(
-              itemCount: polls.length,
-              itemBuilder: (context, index) {
-                return PollCard(
-                  poll: polls[index],
-                  collegeId: 'global', // TODO: Replace with actual global context if needed
-                  pollId: polls[index].id.toString(),
+            child: StreamBuilder(
+              stream: FirebaseFirestore.instance
+                  .collection('GlobalPolls')
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Center(child: Text('No global polls found.'));
+                }
+                final pollDocs = snapshot.data!.docs;
+                return ListView.builder(
+                  itemCount: pollDocs.length,
+                  itemBuilder: (context, index) {
+                    final pollData = pollDocs[index].data();
+                    final pollId = pollDocs[index].id;
+                    final poll = Poll(
+                      id: index, // or use pollId if your model supports it
+                      question: pollData['question'] ?? '',
+                      options: (pollData['options'] as List<dynamic>).map((o) => PollOption(
+                        id: o['id'],
+                        text: o['text'],
+                        votes: o['votes'],
+                      )).toList(),
+                      totalVotes: pollData['totalVotes'] ?? 0,
+                      endDate: pollData['endDate'] ?? '',
+                    );
+                    return PollCard(
+                      poll: poll,
+                      collegeId: 'global',
+                      pollId: pollId,
+                    );
+                  },
                 );
               },
             ),

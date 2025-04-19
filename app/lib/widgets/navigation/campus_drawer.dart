@@ -13,6 +13,7 @@ class CampusDrawer extends StatelessWidget {
   final VoidCallback onGlobalFeedPressed;
   final VoidCallback onEventsPressed;
   final VoidCallback onQuizzesPressed;
+  final VoidCallback onResourcesPressed;
   final String userName;
   final String userEmail;
   final String userCollege;
@@ -28,6 +29,7 @@ class CampusDrawer extends StatelessWidget {
     required this.onGlobalFeedPressed,
     required this.onEventsPressed,
     required this.onQuizzesPressed,
+    required this.onResourcesPressed,
     required this.userName,
     required this.userEmail,
     required this.userCollege,
@@ -102,6 +104,11 @@ class CampusDrawer extends StatelessWidget {
             leading: const Icon(Icons.quiz),
             title: const Text('Quizzes & Battles'),
             onTap: onQuizzesPressed,
+          ),
+          ListTile(
+            leading: const Icon(Icons.folder_shared),
+            title: const Text('Resources'),
+            onTap: onResourcesPressed,
           ),
           ListTile(
             leading: const Icon(Icons.forum),

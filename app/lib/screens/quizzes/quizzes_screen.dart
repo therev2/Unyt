@@ -4,6 +4,10 @@ import 'package:unyt/models/battle_room.dart';
 import 'package:unyt/models/quiz_history.dart';
 import 'package:unyt/widgets/quizzes/quiz_card.dart';
 import 'package:unyt/widgets/quizzes/battle_room_card.dart';
+import 'package:unyt/screens/quizzes/tictactoe_screen.dart';
+import 'package:unyt/screens/quizzes/drawing_game_screen.dart';
+import 'package:unyt/screens/quizzes/emoji_race_screen.dart';
+import 'package:unyt/screens/quizzes/emoji_race_multiplayer_screen.dart';
 
 class QuizzesScreen extends StatefulWidget {
   const QuizzesScreen({super.key});
@@ -194,7 +198,7 @@ class _QuizzesScreenState extends State<QuizzesScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 6, vsync: this);
   }
 
   @override
@@ -213,6 +217,9 @@ class _QuizzesScreenState extends State<QuizzesScreen>
             Tab(text: 'Quizzes'),
             Tab(text: 'Battle Rooms'),
             Tab(text: 'My History'),
+            Tab(text: 'Tic Tac Toe'),
+            Tab(text: 'Drawing Game'),
+            Tab(text: 'Emoji Race'),
           ],
         ),
         Expanded(
@@ -227,6 +234,15 @@ class _QuizzesScreenState extends State<QuizzesScreen>
 
               // My History Tab
               _buildHistoryTab(),
+
+              // Tic Tac Toe Tab
+              const TicTacToeScreen(),
+
+              // Drawing Game Tab
+              const DrawingGameScreen(),
+
+              // Emoji Race Tab
+              const EmojiRaceMultiplayerScreen(),
             ],
           ),
         ),

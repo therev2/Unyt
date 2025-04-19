@@ -14,7 +14,7 @@ export default function LandingPage() {
     <div className="flex flex-col min-h-screen bg-background">
       <header className="flex h-16 items-center justify-between border-b bg-background/80 px-6 backdrop-blur-md z-10">
         <div className="flex items-center gap-2">
-          <img src="/logo-unyt.svg" alt="Unyt Logo" className="h-8 w-8" />
+          <img src="/unyt-logo.svg" alt="Unyt Logo" className="h-8 w-8" />
           <span className="text-xl font-bold tracking-tight">Unyt</span>
         </div>
         <nav className="flex items-center gap-6">

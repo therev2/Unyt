@@ -23,132 +23,6 @@ class _GlobalFeedScreenState extends State<GlobalFeedScreen> {
   int _selectedIndex = 0;
   final PageController _pageController = PageController();
 
-  // Sample data - in a real app, this would come from your API
-  final List<Notice> notices = [
-    Notice(
-      id: 1,
-      title: 'National Education Policy Updates',
-      content:
-          'Important updates to the National Education Policy affecting all colleges across the country. New guidelines to be implemented by next semester.',
-      date: 'Apr 25, 2023',
-      author: 'Ministry of Education',
-      important: true,
-    ),
-    Notice(
-      id: 2,
-      title: 'National Scholarship Applications Open',
-      content:
-          'Applications for national merit scholarships are now open. Eligible students can apply through the national scholarship portal by May 15th.',
-      date: 'Apr 22, 2023',
-      author: 'Scholarship Committee',
-      important: false,
-    ),
-    Notice(
-      id: 3,
-      title: 'Inter-University Credit Transfer System',
-      content:
-          'A new credit transfer system has been implemented to allow students to transfer credits between universities more easily.',
-      date: 'Apr 20, 2023',
-      author: 'University Grants Commission',
-      important: false,
-    ),
-  ];
-
-  final List<Event> events = [
-    Event(
-      id: 1,
-      title: 'National Innovation Summit',
-      description:
-          'Join students from across the country for the biggest innovation summit. Connect with industry leaders and showcase your projects.',
-      date: 'May 25-27, 2023',
-      location: 'Delhi Convention Center',
-      image: 'https://via.placeholder.com/200x100',
-      organizer: 'Ministry of Education',
-    ),
-    Event(
-      id: 2,
-      title: 'All India Hackathon 2023',
-      description:
-          'A 48-hour coding marathon with participants from universities across India. Form teams and solve real-world problems.',
-      date: 'Jun 10-12, 2023',
-      location: 'Virtual Event',
-      image: 'https://via.placeholder.com/200x100',
-      organizer: 'Tech Education Council',
-    ),
-    Event(
-      id: 3,
-      title: 'Global Student Conference',
-      description:
-          'An international conference for students to present research papers and network with global academic leaders.',
-      date: 'July 5-8, 2023',
-      location: 'Mumbai International Center',
-      image: 'https://via.placeholder.com/200x100',
-      organizer: 'Global Education Alliance',
-    ),
-  ];
-
-  final List<Poll> polls = [
-    Poll(
-      id: 1,
-      question: 'What skill should be included in all college curriculums?',
-      options: [
-        PollOption(id: 1, text: 'Financial Literacy', votes: 2345),
-        PollOption(id: 2, text: 'Programming', votes: 1892),
-        PollOption(id: 3, text: 'Public Speaking', votes: 1547),
-        PollOption(id: 4, text: 'Entrepreneurship', votes: 1326),
-      ],
-      totalVotes: 7110,
-      endDate: 'May 10, 2023',
-    ),
-    Poll(
-      id: 2,
-      question: 'Should online examinations become a permanent option?',
-      options: [
-        PollOption(id: 1, text: 'Yes, for all courses', votes: 3280),
-        PollOption(id: 2, text: 'Only for theory courses', votes: 2145),
-        PollOption(id: 3, text: 'No, in-person exams are better', votes: 1870),
-      ],
-      totalVotes: 7295,
-      endDate: 'May 15, 2023',
-    ),
-  ];
-
-  final List<Bulletin> bulletins = [
-    Bulletin(
-      id: 1,
-      title: 'Virtual Study Group for GATE Exam',
-      content:
-          'Creating a nationwide virtual study group for GATE exam preparation. Join if you\'re appearing for any discipline. Contact: nationalgate@gmail.com',
-      author: BulletinAuthor(
-        name: 'Vikram Singh',
-        avatar: 'https://via.placeholder.com/40x40',
-      ),
-      date: 'Apr 24, 2023',
-    ),
-    Bulletin(
-      id: 2,
-      title: 'Research Paper Collaboration',
-      content:
-          'Looking for collaborators on a machine learning research paper. Need students with good understanding of neural networks and NLP.',
-      author: BulletinAuthor(
-        name: 'Dr. Ramesh Kumar',
-        avatar: 'https://via.placeholder.com/40x40',
-      ),
-      date: 'Apr 23, 2023',
-    ),
-    Bulletin(
-      id: 3,
-      title: 'Nationwide Quiz Competition Recruitment',
-      content:
-          'Forming a team for the upcoming National Quiz League. Need participants with knowledge in science, history, sports, and current affairs.',
-      author: BulletinAuthor(
-        name: 'Quiz Club Federation',
-        avatar: 'https://via.placeholder.com/40x40',
-      ),
-      date: 'Apr 20, 2023',
-    ),
-  ];
-
   @override
   void dispose() {
     _pageController.dispose();
@@ -321,10 +195,40 @@ class _GlobalFeedScreenState extends State<GlobalFeedScreen> {
           ),
           const SizedBox(height: 16),
           Expanded(
-            child: ListView.builder(
-              itemCount: notices.length,
-              itemBuilder: (context, index) {
-                return NoticeCard(notice: notices[index]);
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('GlobalNotices')
+                  .orderBy('datetime', descending: true)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: [${snapshot.error}'));
+                }
+                final docs = snapshot.data?.docs ?? [];
+                if (docs.isEmpty) {
+                  return const Center(child: Text('No notices yet.'));
+                }
+                return ListView.builder(
+                  itemCount: docs.length,
+                  itemBuilder: (context, index) {
+                    final data = docs[index].data() as Map<String, dynamic>;
+                    return NoticeCard(
+                      notice: Notice(
+                        id: docs[index].id.hashCode, // Use hashCode of string id for int
+                        title: data['title'] ?? '',
+                        content: data['content'] ?? '',
+                        date: (data['datetime'] is Timestamp)
+                            ? (data['datetime'] as Timestamp).toDate().toString()
+                            : (data['datetime']?.toString() ?? ''),
+                        author: data['author'] ?? 'Unknown',
+                        important: data['important'] ?? false,
+                      ),
+                    );
+                  },
+                );
               },
             ),
           ),
@@ -364,10 +268,41 @@ class _GlobalFeedScreenState extends State<GlobalFeedScreen> {
           ),
           const SizedBox(height: 16),
           Expanded(
-            child: ListView.builder(
-              itemCount: events.length,
-              itemBuilder: (context, index) {
-                return EventCard(event: events[index]);
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('GlobalEvents')
+                  .orderBy('datetime', descending: true)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: [${snapshot.error}'));
+                }
+                final docs = snapshot.data?.docs ?? [];
+                if (docs.isEmpty) {
+                  return const Center(child: Text('No events yet.'));
+                }
+                return ListView.builder(
+                  itemCount: docs.length,
+                  itemBuilder: (context, index) {
+                    final data = docs[index].data() as Map<String, dynamic>;
+                    return EventCard(
+                      event: Event(
+                        id: docs[index].id.hashCode, // Use hashCode of string id for int
+                        title: data['title'] ?? '',
+                        description: data['description'] ?? '',
+                        date: (data['datetime'] is Timestamp)
+                            ? (data['datetime'] as Timestamp).toDate().toString()
+                            : (data['datetime']?.toString() ?? ''),
+                        location: data['location'] ?? '',
+                        image: data['image'] ?? '',
+                        organizer: data['organizer'] ?? '',
+                      ),
+                    );
+                  },
+                );
               },
             ),
           ),
@@ -393,11 +328,11 @@ class _GlobalFeedScreenState extends State<GlobalFeedScreen> {
                 onPressed: () async {
                   await GlobalPollAdminService.createSampleGlobalPolls();
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Sample global polls created!')),
+                    const SnackBar(content: Text('Sample polls created!')),
                   );
                 },
                 icon: const Icon(Icons.add),
-                label: const Text('Create Poll'),
+                label: const Text('Sample Polls'),
                 style: const ButtonStyle(
                   padding: MaterialStatePropertyAll(
                     EdgeInsets.symmetric(horizontal: 16.0),
@@ -408,31 +343,35 @@ class _GlobalFeedScreenState extends State<GlobalFeedScreen> {
           ),
           const SizedBox(height: 16),
           Expanded(
-            child: StreamBuilder(
+            child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('GlobalPolls')
+                  .orderBy('endDate', descending: true)
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return const Center(child: Text('No global polls found.'));
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: [${snapshot.error}'));
                 }
                 final pollDocs = snapshot.data!.docs;
                 return ListView.builder(
                   itemCount: pollDocs.length,
                   itemBuilder: (context, index) {
-                    final pollData = pollDocs[index].data();
+                    final pollData = pollDocs[index].data() as Map<String, dynamic>;
                     final pollId = pollDocs[index].id;
                     final poll = Poll(
-                      id: index, // or use pollId if your model supports it
+                      id: pollId.hashCode, // Use hashCode of string id for int
                       question: pollData['question'] ?? '',
-                      options: (pollData['options'] as List<dynamic>).map((o) => PollOption(
-                        id: o['id'],
-                        text: o['text'],
-                        votes: o['votes'],
-                      )).toList(),
+                      options: (pollData['options'] as List<dynamic>? ?? []).map((o) {
+                        final option = o as Map<String, dynamic>;
+                        return PollOption(
+                          id: option['id'] ?? 0,
+                          text: option['text'] ?? '',
+                          votes: option['votes'] ?? 0,
+                        );
+                      }).toList(),
                       totalVotes: pollData['totalVotes'] ?? 0,
                       endDate: pollData['endDate'] ?? '',
                     );
@@ -579,7 +518,7 @@ class _GlobalFeedScreenState extends State<GlobalFeedScreen> {
               ),
               ElevatedButton.icon(
                 onPressed: () {
-                  // Post to bulletin
+                  // TODO: Implement post to bulletin
                 },
                 icon: const Icon(Icons.add),
                 label: const Text('Post to Bulletin'),
@@ -593,10 +532,42 @@ class _GlobalFeedScreenState extends State<GlobalFeedScreen> {
           ),
           const SizedBox(height: 16),
           Expanded(
-            child: ListView.builder(
-              itemCount: bulletins.length,
-              itemBuilder: (context, index) {
-                return BulletinCard(bulletin: bulletins[index]);
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('GlobalBulletin')
+                  .orderBy('datetime', descending: true)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: [${snapshot.error}'));
+                }
+                final docs = snapshot.data?.docs ?? [];
+                if (docs.isEmpty) {
+                  return const Center(child: Text('No bulletin posts yet.'));
+                }
+                return ListView.builder(
+                  itemCount: docs.length,
+                  itemBuilder: (context, index) {
+                    final data = docs[index].data() as Map<String, dynamic>;
+                    return BulletinCard(
+                      bulletin: Bulletin(
+                        id: docs[index].id.hashCode, // Use hashCode of string id for int
+                        title: data['title'] ?? '',
+                        content: data['content'] ?? '',
+                        author: BulletinAuthor(
+                          name: data['author_name'] ?? 'Anonymous',
+                          avatar: data['author_avatar'] ?? '',
+                        ),
+                        date: (data['datetime'] is Timestamp)
+                            ? (data['datetime'] as Timestamp).toDate().toString()
+                            : (data['datetime']?.toString() ?? ''),
+                      ),
+                    );
+                  },
+                );
               },
             ),
           ),

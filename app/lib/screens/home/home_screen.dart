@@ -22,11 +22,14 @@ class _HomeScreenState extends State<HomeScreen> {
   final PageController _pageController = PageController();
   List<Notice> notices = [];
   bool _isLoading = true;
+  List<Event> events = [];
+  bool _isEventsLoading = true;
 
   @override
   void initState() {
     super.initState();
     fetchNotices();
+    fetchEvents();
   }
 
   Future<void> fetchNotices() async {
@@ -80,38 +83,57 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  final List<Event> events = [
-    Event(
-      id: 1,
-      title: 'Annual Tech Fest',
-      description:
-          'Join us for the biggest tech festival of the year with workshops, competitions, and guest lectures.',
-      date: 'May 15-17, 2023',
-      location: 'Main Auditorium',
-      image: 'https://via.placeholder.com/200x100',
-      organizer: 'Technical Club',
-    ),
-    Event(
-      id: 2,
-      title: 'Career Fair 2023',
-      description:
-          'Meet recruiters from over 50 companies. Bring your resume and dress professionally.',
-      date: 'May 5, 2023',
-      location: 'Convention Center',
-      image: 'https://via.placeholder.com/200x100',
-      organizer: 'Placement Cell',
-    ),
-    Event(
-      id: 3,
-      title: 'Cultural Night',
-      description:
-          'An evening of music, dance, and drama performances by students.',
-      date: 'Apr 28, 2023',
-      location: 'Open Air Theater',
-      image: 'https://via.placeholder.com/200x100',
-      organizer: 'Cultural Committee',
-    ),
-  ];
+  Future<void> fetchEvents() async {
+    setState(() {
+      _isEventsLoading = true;
+    });
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) throw Exception('No user signed in');
+      print('Current user: ${user.uid}');
+
+      final studentDoc = await FirebaseFirestore.instance
+          .collection('Students')
+          .doc(user.uid)
+          .get();
+      print('Student doc data: ${studentDoc.data()}');
+      final collegeId = studentDoc.data()?['collegeId'];
+      if (collegeId == null) throw Exception('No collegeId found for student');
+      print('College ID: ${collegeId}');
+
+      final eventsSnapshot = await FirebaseFirestore.instance
+          .collection('Colleges')
+          .doc(collegeId)
+          .collection('Events')
+          .get();
+      print('Number of events fetched: ${eventsSnapshot.docs.length}');
+
+      final fetchedEvents = eventsSnapshot.docs.map((doc) {
+        final data = doc.data();
+        print('Event data: ${data}');
+        return Event(
+          id: data['id'] ?? 0,
+          title: data['title'] ?? '',
+          description: data['description'] ?? '',
+          date: data['date'] ?? '',
+          location: data['location'] ?? '',
+          image: data['image'] ?? '',
+          organizer: data['organizer'] ?? '',
+        );
+      }).toList();
+
+      setState(() {
+        events = fetchedEvents;
+        _isEventsLoading = false;
+      });
+    } catch (e) {
+      print('Error fetching events: ${e}');
+      setState(() {
+        _isEventsLoading = false;
+      });
+    }
+  }
 
   final List<Poll> polls = [
     Poll(
@@ -295,6 +317,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildEventsTab() {
+    if (_isEventsLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(

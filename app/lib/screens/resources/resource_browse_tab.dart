@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:unyt/models/resource.dart';
 import 'package:unyt/services/resource_service.dart';
 import 'package:unyt/services/college_service.dart';
+import 'package:unyt/screens/resources/resource_preview_screen.dart';
 
 class ResourceBrowseTab extends StatefulWidget {
   const ResourceBrowseTab({Key? key}) : super(key: key);
@@ -116,7 +117,11 @@ class _ResourceBrowseTabState extends State<ResourceBrowseTab> {
                         },
                       ),
                       onTap: () {
-                        // TODO: Show resource details or preview
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => ResourcePreviewScreen(resource: res),
+                          ),
+                        );
                       },
                     );
                   },

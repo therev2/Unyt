@@ -27,6 +27,8 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLoading = true;
   List<Event> events = [];
   bool _isEventsLoading = true;
+  List<Bulletin> bulletins = [];
+  bool _isBulletinsLoading = true;
 
   @override
   void initState() {
@@ -34,6 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _fetchCollegeId();
     fetchNotices();
     fetchEvents();
+    fetchBulletins();
   }
 
   Future<void> _fetchCollegeId() async {
@@ -152,6 +155,59 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> fetchBulletins() async {
+    setState(() {
+      _isBulletinsLoading = true;
+    });
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) throw Exception('No user signed in');
+      print('Current user: ${user.uid}');
+
+      final studentDoc = await FirebaseFirestore.instance
+          .collection('Students')
+          .doc(user.uid)
+          .get();
+      print('Student doc data: ${studentDoc.data()}');
+      final collegeId = studentDoc.data()?['collegeId'];
+      if (collegeId == null) throw Exception('No collegeId found for student');
+      print('College ID: ${collegeId}');
+
+      final bulletinsSnapshot = await FirebaseFirestore.instance
+          .collection('Colleges')
+          .doc(collegeId)
+          .collection('Bulletin')
+          .get();
+      print('Number of bulletins fetched: ${bulletinsSnapshot.docs.length}');
+
+      final fetchedBulletins = bulletinsSnapshot.docs.map((doc) {
+        final data = doc.data();
+        print('Bulletin data: ${data}');
+        return Bulletin(
+          id: data['id'] ?? 0,
+          title: data['title'] ?? '',
+          content: data['content'] ?? '',
+          author: BulletinAuthor(
+            name: data['author_name'] ?? '',
+            avatar: data['author_avatar'] ?? '',
+          ),
+          date: data['date'] ?? '',
+        );
+      }).toList();
+
+      setState(() {
+        bulletins = fetchedBulletins;
+        _isBulletinsLoading = false;
+      });
+    } catch (e) {
+      print('Error fetching bulletins: ${e}');
+      setState(() {
+        _isBulletinsLoading = false;
+      });
+    }
+  }
+
   final List<Poll> polls = [
     Poll(
       id: 1,
@@ -175,42 +231,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ],
       totalVotes: 184,
       endDate: 'Apr 30, 2023',
-    ),
-  ];
-
-  final List<Bulletin> bulletins = [
-    Bulletin(
-      id: 1,
-      title: 'Selling Textbooks',
-      content:
-          'Selling Computer Networks and Database Management System textbooks. Both in excellent condition. Contact: 9876543210',
-      author: BulletinAuthor(
-        name: 'Rahul Sharma',
-        avatar: 'https://via.placeholder.com/40x40',
-      ),
-      date: 'Apr 19, 2023',
-    ),
-    Bulletin(
-      id: 2,
-      title: 'Roommate Wanted',
-      content:
-          'Looking for a roommate to share an apartment near campus. Rent: ₹8000/month. Available from May 1st.',
-      author: BulletinAuthor(
-        name: 'Priya Patel',
-        avatar: 'https://via.placeholder.com/40x40',
-      ),
-      date: 'Apr 17, 2023',
-    ),
-    Bulletin(
-      id: 3,
-      title: 'Coding Club Recruitment',
-      content:
-          'The Coding Club is recruiting new members. If you\'re passionate about programming, join us! Apply by April 30th.',
-      author: BulletinAuthor(
-        name: 'Coding Club',
-        avatar: 'https://via.placeholder.com/40x40',
-      ),
-      date: 'Apr 15, 2023',
     ),
   ];
 
@@ -638,6 +658,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildBulletinTab() {
+    if (_isBulletinsLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(

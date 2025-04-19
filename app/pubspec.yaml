@@ -73,26 +73,31 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  
-  # Linting
+  flutter_launcher_icons: ^0.14.3
+  flutter_native_splash: ^2.3.10
   flutter_lints: ^2.0.3
-  
-  # Testing
   mockito: ^5.4.2
-  
-  # Build tools
   build_runner: ^2.4.6
 
-# The following section is specific to Flutter packages
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "lib/unyt.png"
+
+flutter_native_splash:
+  color: "#ffffff"
+  image: lib/unyt.png
+  android: true
+  ios: true
+
 flutter:
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
 
-  # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - assets/images/
+  assets:
+    - lib/unyt.png
   #   - assets/icons/
   #   - assets/animations/
 

@@ -3,6 +3,7 @@ import 'package:unyt/models/poll.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:unyt/services/poll_service.dart';
+import 'package:unyt/services/global_poll_service.dart';
 
 class PollCard extends StatefulWidget {
   final Poll poll;
@@ -34,7 +35,12 @@ class _PollCardState extends State<PollCard> {
   Future<void> _checkIfVoted() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
-    final hasVoted = await PollService().hasUserVoted(widget.collegeId, widget.pollId, user.uid);
+    bool hasVoted = false;
+    if (widget.collegeId == 'global') {
+      hasVoted = await GlobalPollService().hasUserVoted(widget.pollId, user.uid);
+    } else {
+      hasVoted = await PollService().hasUserVoted(widget.collegeId, widget.pollId, user.uid);
+    }
     setState(() {
       _hasVoted = hasVoted;
     });
@@ -48,12 +54,20 @@ class _PollCardState extends State<PollCard> {
       _error = null;
     });
     try {
-      await PollService().voteOnPoll(
-        collegeId: widget.collegeId,
-        pollId: widget.pollId,
-        optionId: _selectedOptionId!,
-        userId: user.uid,
-      );
+      if (widget.collegeId == 'global') {
+        await GlobalPollService().voteOnPoll(
+          pollId: widget.pollId,
+          optionId: _selectedOptionId!,
+          userId: user.uid,
+        );
+      } else {
+        await PollService().voteOnPoll(
+          collegeId: widget.collegeId,
+          pollId: widget.pollId,
+          optionId: _selectedOptionId!,
+          userId: user.uid,
+        );
+      }
       setState(() {
         _hasVoted = true;
       });

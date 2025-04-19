@@ -4,10 +4,7 @@ import 'package:unyt/models/battle_room.dart';
 class BattleRoomCard extends StatelessWidget {
   final BattleRoom battleRoom;
 
-  const BattleRoomCard({
-    super.key,
-    required this.battleRoom,
-  });
+  const BattleRoomCard({super.key, required this.battleRoom});
 
   @override
   Widget build(BuildContext context) {
@@ -27,23 +24,29 @@ class BattleRoomCard extends StatelessWidget {
                     children: [
                       Text(
                         battleRoom.title,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 4),
                       Row(
                         children: [
                           CircleAvatar(
-                            backgroundImage: NetworkImage(battleRoom.creator.avatar),
+                            backgroundImage: NetworkImage(
+                              battleRoom.creator.avatar,
+                            ),
                             radius: 10,
                           ),
                           const SizedBox(width: 4),
                           Text(
                             'Created by ${battleRoom.creator.name}',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                ),
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodySmall?.copyWith(
+                              color:
+                                  Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                            ),
                           ),
                         ],
                       ),
@@ -78,14 +81,22 @@ class BattleRoomCard extends StatelessWidget {
                   label: const Text('Details'),
                 ),
                 ElevatedButton.icon(
-                  onPressed: battleRoom.status == 'In Progress'
-                      ? null
-                      : () {
-                          // Join battle room
-                        },
+                  onPressed:
+                      battleRoom.status == 'In Progress'
+                          ? null
+                          : () {
+                            // Join battle room
+                          },
                   icon: const Icon(Icons.play_arrow, size: 16),
                   label: Text(
-                    battleRoom.status == 'In Progress' ? 'In Progress' : 'Join Battle',
+                    battleRoom.status == 'In Progress'
+                        ? 'In Progress'
+                        : 'Join Battle',
+                  ),
+                  style: const ButtonStyle(
+                    padding: MaterialStatePropertyAll(
+                      EdgeInsets.symmetric(horizontal: 12.0),
+                    ),
                   ),
                 ),
               ],
@@ -142,8 +153,8 @@ class BattleRoomCard extends StatelessWidget {
         Text(
           text,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
       ],
     );

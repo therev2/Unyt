@@ -4,10 +4,7 @@ import 'package:unyt/models/event.dart';
 class EventCard extends StatelessWidget {
   final Event event;
 
-  const EventCard({
-    super.key,
-    required this.event,
-  });
+  const EventCard({super.key, required this.event});
 
   @override
   Widget build(BuildContext context) {
@@ -17,12 +14,13 @@ class EventCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Image.network(
-            event.image,
-            height: 150,
-            width: double.infinity,
-            fit: BoxFit.cover,
-          ),
+          // Image.network(
+          //   event.image,
+          //   height: 150,
+          //   width: double.infinity,
+          //   fit: BoxFit.cover,
+          // ),
+          const Placeholder(fallbackHeight: 150),
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -31,15 +29,15 @@ class EventCard extends StatelessWidget {
                 Text(
                   event.title,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   '${event.date} • ${event.location}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -53,8 +51,8 @@ class EventCard extends StatelessWidget {
                     Text(
                       'By ${event.organizer}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
                     ElevatedButton(
                       onPressed: () {

@@ -118,10 +118,10 @@ class _ForumsScreenState extends State<ForumsScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Discussion Forums'),
-        bottom: TabBar(
+    return Column(
+      children: [
+        // TabBar
+        TabBar(
           controller: _tabController,
           isScrollable: true,
           tabs: const [
@@ -132,93 +132,81 @@ class _ForumsScreenState extends State<ForumsScreen>
             Tab(text: 'Campus Life'),
           ],
         ),
-      ),
-      body: Column(
-        children: [
-          // Search Bar
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search topics...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                filled: true,
-                fillColor: Theme.of(
-                  context,
-                ).colorScheme.surfaceVariant.withOpacity(0.3),
+        // Search Bar
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              hintText: 'Search topics...',
+              prefixIcon: const Icon(Icons.search),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              contentPadding: const EdgeInsets.symmetric(vertical: 0),
+              filled: true,
+              fillColor: Theme.of(
+                context,
+              ).colorScheme.surfaceVariant.withOpacity(0.3),
+            ),
+          ),
+        ),
+
+        // Forum Stats
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildStatItem(context, '120', 'Topics'),
+                  _buildStatItem(context, '3.5K', 'Posts'),
+                  _buildStatItem(context, '12.8K', 'Members'),
+                  _buildStatItem(context, '450', 'Online'),
+                ],
               ),
             ),
           ),
+        ),
 
-          // Forum Stats
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildStatItem(context, '120', 'Topics'),
-                    _buildStatItem(context, '3.5K', 'Posts'),
-                    _buildStatItem(context, '12.8K', 'Members'),
-                    _buildStatItem(context, '450', 'Online'),
-                  ],
-                ),
+        // Topics List
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              // All Topics Tab
+              _buildTopicsList(topics),
+
+              // Academics Tab
+              _buildTopicsList(
+                topics.where((topic) => topic.category == 'Academics').toList(),
               ),
-            ),
+
+              // Career Tab
+              _buildTopicsList(
+                topics.where((topic) => topic.category == 'Career').toList(),
+              ),
+
+              // Technology Tab
+              _buildTopicsList(
+                topics
+                    .where((topic) => topic.category == 'Technology')
+                    .toList(),
+              ),
+
+              // Campus Life Tab
+              _buildTopicsList(
+                topics
+                    .where((topic) => topic.category == 'Campus Life')
+                    .toList(),
+              ),
+            ],
           ),
-
-          // Topics List
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                // All Topics Tab
-                _buildTopicsList(topics),
-
-                // Academics Tab
-                _buildTopicsList(
-                  topics
-                      .where((topic) => topic.category == 'Academics')
-                      .toList(),
-                ),
-
-                // Career Tab
-                _buildTopicsList(
-                  topics.where((topic) => topic.category == 'Career').toList(),
-                ),
-
-                // Technology Tab
-                _buildTopicsList(
-                  topics
-                      .where((topic) => topic.category == 'Technology')
-                      .toList(),
-                ),
-
-                // Campus Life Tab
-                _buildTopicsList(
-                  topics
-                      .where((topic) => topic.category == 'Campus Life')
-                      .toList(),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          // Create new topic
-        },
-        icon: const Icon(Icons.add),
-        label: const Text('New Topic'),
-      ),
+        ),
+      ],
+      // FloatingActionButton will be handled by the parent Scaffold if needed
     );
   }
 

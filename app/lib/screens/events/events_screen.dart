@@ -116,13 +116,44 @@ class _EventsScreenState extends State<EventsScreen>
 
   Widget _buildUpcomingEventsTab() {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Row(
+      padding: const EdgeInsets.all(12.0),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Events List
+          // Filter bar at the top
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12.0,
+                vertical: 8.0,
+              ),
+              child: Row(
+                children: [
+                  // Search icon
+                  const Icon(Icons.search),
+                  const SizedBox(width: 8),
+
+                  // Search/filter text
+                  const Expanded(child: Text('Filter events...')),
+
+                  // Filter button
+                  TextButton.icon(
+                    icon: const Icon(Icons.filter_list),
+                    label: const Text('Filter'),
+                    onPressed: () {
+                      // Show filter bottom sheet
+                      _showFilterBottomSheet(context);
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Events list
           Expanded(
-            flex: 3,
             child: ListView.builder(
               itemCount: events.length,
               itemBuilder: (context, index) {
@@ -130,20 +161,45 @@ class _EventsScreenState extends State<EventsScreen>
               },
             ),
           ),
+        ],
+      ),
+    );
+  }
 
-          // Filter Panel
-          const SizedBox(width: 16),
-          Expanded(
-            flex: 1,
-            child: Card(
+  // Method to show filter options in a bottom sheet
+  void _showFilterBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.6,
+          maxChildSize: 0.9,
+          minChildSize: 0.5,
+          expand: false,
+          builder: (context, scrollController) {
+            return SingleChildScrollView(
+              controller: scrollController,
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Filter Events',
-                      style: Theme.of(context).textTheme.titleMedium,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Filter Events',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 16),
 
@@ -262,6 +318,7 @@ class _EventsScreenState extends State<EventsScreen>
                       child: ElevatedButton(
                         onPressed: () {
                           // Apply filters
+                          Navigator.pop(context);
                         },
                         child: const Text('Apply Filters'),
                       ),
@@ -269,16 +326,16 @@ class _EventsScreenState extends State<EventsScreen>
                   ],
                 ),
               ),
-            ),
-          ),
-        ],
-      ),
+            );
+          },
+        );
+      },
     );
   }
 
   Widget _buildCalendarTab() {
     // Sample calendar data
-    final currentMonth = 'May 2023';
+    const currentMonth = 'May 2023';
     final calendarDays = List.generate(31, (index) {
       final date = index + 1;
       final events =
@@ -455,7 +512,7 @@ class _EventsScreenState extends State<EventsScreen>
       padding: const EdgeInsets.all(16.0),
       child: GridView.builder(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
+          crossAxisCount: 1,
           childAspectRatio: 0.8,
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
@@ -468,12 +525,13 @@ class _EventsScreenState extends State<EventsScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Image.network(
-                  event.image,
-                  height: 120,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
+                // Image.network(
+                //   event.image,
+                //   height: 120,
+                //   width: double.infinity,
+                //   fit: BoxFit.cover,
+                // ),
+                const Placeholder(fallbackHeight: 180),
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
@@ -490,11 +548,8 @@ class _EventsScreenState extends State<EventsScreen>
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          Chip(
-                            label: const Text(
-                              'Tech',
-                              style: TextStyle(fontSize: 10),
-                            ),
+                          const Chip(
+                            label: Text('Tech', style: TextStyle(fontSize: 10)),
                             padding: EdgeInsets.zero,
                             materialTapTargetSize:
                                 MaterialTapTargetSize.shrinkWrap,
@@ -520,27 +575,33 @@ class _EventsScreenState extends State<EventsScreen>
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          OutlinedButton(
-                            onPressed: () {
-                              // View event details
-                            },
-                            child: const Text('View Details'),
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              // Cancel registration
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.error,
-                            ),
-                            child: const Text('Cancel'),
-                          ),
-                        ],
+                    ],
+                  ),
+                ),
+
+                // Spacer to push buttons to bottom
+                const Spacer(),
+
+                // Buttons at bottom of card
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      OutlinedButton(
+                        onPressed: () {
+                          // View event details
+                        },
+                        child: const Text('View Details'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          // Cancel registration
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).colorScheme.error,
+                        ),
+                        child: const Text('Cancel'),
                       ),
                     ],
                   ),
@@ -558,7 +619,7 @@ class _EventsScreenState extends State<EventsScreen>
       padding: const EdgeInsets.all(16.0),
       child: GridView.builder(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
+          crossAxisCount: 1,
           childAspectRatio: 0.8,
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
@@ -575,14 +636,15 @@ class _EventsScreenState extends State<EventsScreen>
                   children: [
                     Stack(
                       children: [
-                        Image.network(
-                          event.image,
-                          height: 120,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          color: Colors.black.withOpacity(0.3),
-                          colorBlendMode: BlendMode.darken,
-                        ),
+                        // Image.network(
+                        //   event.image,
+                        //   height: 120,
+                        //   width: double.infinity,
+                        //   fit: BoxFit.cover,
+                        //   color: Colors.black.withOpacity(0.3),
+                        //   colorBlendMode: BlendMode.darken,
+                        // ),
+                        const Placeholder(fallbackHeight: 180),
                         Positioned.fill(
                           child: Center(
                             child: Chip(
@@ -616,8 +678,8 @@ class _EventsScreenState extends State<EventsScreen>
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              Chip(
-                                label: const Text(
+                              const Chip(
+                                label: Text(
                                   'Cultural',
                                   style: TextStyle(fontSize: 10),
                                 ),
@@ -646,23 +708,31 @@ class _EventsScreenState extends State<EventsScreen>
                               ),
                             ],
                           ),
-                          const SizedBox(height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              OutlinedButton(
-                                onPressed: () {
-                                  // View event details
-                                },
-                                child: const Text('View Details'),
-                              ),
-                              OutlinedButton(
-                                onPressed: () {
-                                  // View photos
-                                },
-                                child: const Text('View Photos'),
-                              ),
-                            ],
+                        ],
+                      ),
+                    ),
+
+                    const Spacer(),
+                    const SizedBox(height: 16),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 20.0,
+                        horizontal: 10,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          OutlinedButton(
+                            onPressed: () {
+                              // View event details
+                            },
+                            child: const Text('View Details'),
+                          ),
+                          OutlinedButton(
+                            onPressed: () {
+                              // View photos
+                            },
+                            child: const Text('View Photos'),
                           ),
                         ],
                       ),

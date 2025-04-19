@@ -4,10 +4,7 @@ import 'package:unyt/models/quiz.dart';
 class QuizCard extends StatelessWidget {
   final Quiz quiz;
 
-  const QuizCard({
-    super.key,
-    required this.quiz,
-  });
+  const QuizCard({super.key, required this.quiz});
 
   @override
   Widget build(BuildContext context) {
@@ -19,19 +16,25 @@ class QuizCard extends StatelessWidget {
           // Quiz Image
           Stack(
             children: [
-              Image.network(
-                quiz.image,
-                height: 100,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
+              // Image.network(
+              //   quiz.image,
+              //   height: 100,
+              //   width: double.infinity,
+              //   fit: BoxFit.cover,
+              // ),
+              const Placeholder(fallbackHeight: 180),
               Positioned(
                 top: 8,
                 right: 8,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: _getDifficultyColor(quiz.difficulty).withOpacity(0.8),
+                    color: _getDifficultyColor(
+                      quiz.difficulty,
+                    ).withOpacity(0.8),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -46,7 +49,7 @@ class QuizCard extends StatelessWidget {
               ),
             ],
           ),
-          
+
           // Quiz Details
           Padding(
             padding: const EdgeInsets.all(12),
@@ -56,8 +59,8 @@ class QuizCard extends StatelessWidget {
                 Text(
                   quiz.title,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    fontWeight: FontWeight.bold,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -72,8 +75,16 @@ class QuizCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildInfoItem(context, Icons.help_outline, '${quiz.questions} Qs'),
-                    _buildInfoItem(context, Icons.timer, '${quiz.timeLimit} min'),
+                    _buildInfoItem(
+                      context,
+                      Icons.help_outline,
+                      '${quiz.questions} Qs',
+                    ),
+                    _buildInfoItem(
+                      context,
+                      Icons.timer,
+                      '${quiz.timeLimit} min',
+                    ),
                     _buildInfoItem(context, Icons.star, '${quiz.points} pts'),
                   ],
                 ),
@@ -89,8 +100,8 @@ class QuizCard extends StatelessWidget {
                       child: Text(
                         'By ${quiz.creator.name}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -98,16 +109,23 @@ class QuizCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // Start quiz
-                    },
-                    child: const Text('Start Quiz'),
-                  ),
-                ),
               ],
+            ),
+          ),
+          const Spacer(),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 8.0,
+              vertical: 20.0,
+            ),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  // Start quiz
+                },
+                child: const Text('Start Quiz'),
+              ),
             ),
           ),
         ],
@@ -127,8 +145,8 @@ class QuizCard extends StatelessWidget {
         Text(
           text,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
       ],
     );

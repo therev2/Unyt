@@ -138,57 +138,33 @@ class _ProfileScreenState extends State<ProfileScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Profile'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () {
-              // Edit profile
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.share),
-            onPressed: () {
-              // Share profile
-            },
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Profile Header
-          ProfileHeader(profile: userProfile),
+    return Column(
+      children: [
+        // Profile Header
+        ProfileHeader(profile: userProfile),
 
-          // Tabs
-          TabBar(
+        // Tabs
+        TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: 'Achievements'),
+            Tab(text: 'Activity'),
+            Tab(text: 'Stats'),
+          ],
+        ),
+
+        // Tab Content
+        Expanded(
+          child: TabBarView(
             controller: _tabController,
-            tabs: const [
-              Tab(text: 'Achievements'),
-              Tab(text: 'Activity'),
-              Tab(text: 'Stats'),
+            children: [
+              _buildAchievementsTab(),
+              _buildActivityTab(),
+              _buildStatsTab(),
             ],
           ),
-
-          // Tab Content
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                // Achievements Tab
-                _buildAchievementsTab(),
-
-                // Activity Tab
-                _buildActivityTab(),
-
-                // Stats Tab
-                _buildStatsTab(),
-              ],
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -391,7 +367,6 @@ class _ProfileScreenState extends State<ProfileScreen>
                 color: color,
               ),
             ),
-            const SizedBox(height: 8),
             Text(
               title,
               style: Theme.of(context).textTheme.bodyMedium,

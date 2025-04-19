@@ -4,10 +4,7 @@ import 'package:unyt/models/forum_topic.dart';
 class TopicCard extends StatelessWidget {
   final ForumTopic topic;
 
-  const TopicCard({
-    super.key,
-    required this.topic,
-  });
+  const TopicCard({super.key, required this.topic});
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +36,10 @@ class TopicCard extends StatelessWidget {
                             if (topic.isSticky)
                               Container(
                                 margin: const EdgeInsets.only(right: 8),
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Theme.of(context).colorScheme.primary,
                                   borderRadius: BorderRadius.circular(4),
@@ -47,7 +47,8 @@ class TopicCard extends StatelessWidget {
                                 child: Text(
                                   'Sticky',
                                   style: TextStyle(
-                                    color: Theme.of(context).colorScheme.onPrimary,
+                                    color:
+                                        Theme.of(context).colorScheme.onPrimary,
                                     fontSize: 10,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -56,9 +57,8 @@ class TopicCard extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 topic.title,
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(fontWeight: FontWeight.bold),
                               ),
                             ),
                           ],
@@ -71,27 +71,37 @@ class TopicCard extends StatelessWidget {
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                         const SizedBox(height: 8),
-                        Row(
+                        Wrap(
+                          runSpacing: 4,
                           children: [
                             Text(
                               topic.author.name,
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(width: 4),
                             Text(
                               '• ${topic.author.college}',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                  ),
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodySmall?.copyWith(
+                                color:
+                                    Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                              ),
                             ),
                             const SizedBox(width: 4),
                             Text(
                               '• ${topic.createdAt}',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                  ),
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodySmall?.copyWith(
+                                color:
+                                    Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                              ),
                             ),
                           ],
                         ),
@@ -101,10 +111,12 @@ class TopicCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Wrap(
+                runSpacing: 10,
+                direction: Axis.horizontal,
                 children: [
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Chip(
                         label: Text(
@@ -115,7 +127,11 @@ class TopicCard extends StatelessWidget {
                         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                       const SizedBox(width: 8),
-                      _buildInfoItem(context, Icons.visibility, '${topic.views}'),
+                      _buildInfoItem(
+                        context,
+                        Icons.visibility,
+                        '${topic.views}',
+                      ),
                       const SizedBox(width: 16),
                       _buildInfoItem(context, Icons.forum, '${topic.replies}'),
                     ],
@@ -123,8 +139,8 @@ class TopicCard extends StatelessWidget {
                   Text(
                     'Last activity: ${topic.lastActivity}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -147,8 +163,8 @@ class TopicCard extends StatelessWidget {
         Text(
           text,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
       ],
     );

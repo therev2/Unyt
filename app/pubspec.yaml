@@ -60,6 +60,10 @@ dependencies:
   firebase_core: ^3.13.0
   firebase_analytics: 11.4.5
   
+  # Firestore and Storage
+  cloud_firestore: ^5.6.6
+  firebase_storage: ^12.4.5
+  
   # Notifications
   firebase_messaging: ^15.2.5
   
@@ -68,36 +72,30 @@ dependencies:
   
   # Date and time
   table_calendar: ^3.0.9
-  cloud_firestore: ^5.6.6
+  image: ^4.3.0
+  file_picker: ^10.1.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_launcher_icons: ^0.14.3
-  flutter_native_splash: ^2.3.10
-  flutter_lints: ^2.0.3
-  mockito: ^5.4.2
-  build_runner: ^2.4.6
+  flutter_lints: ^5.0.0
+  mockito: ^5.4.5
+  build_runner: ^2.4.15
 
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "lib/unyt.png"
-
-flutter_native_splash:
-  color: "#ffffff"
-  image: lib/unyt.png
-  android: true
-  ios: true
+  image_path: "lib/unyt_cropped.png"
+  android_adaptive_icon_foreground: "lib/unyt_cropped.png"
+  android_adaptive_icon_background: "#ffffff"
+  remove_alpha_ios_icon: true
 
 flutter:
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
   uses-material-design: true
-
   assets:
     - lib/unyt.png
+    - lib/unyt_cropped.png
   #   - assets/icons/
   #   - assets/animations/
 

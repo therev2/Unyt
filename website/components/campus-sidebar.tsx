@@ -126,10 +126,7 @@ export function CampusSidebar() {
     <Sidebar>
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-2">
-          <Avatar className="h-8 w-8">
-            <AvatarImage src="/placeholder.svg?height=32&width=32" alt="Logo" />
-            <AvatarFallback>CC</AvatarFallback>
-          </Avatar>
+          <img src="/unyt-logo.svg" alt="Unyt Logo" className="h-8 w-8 rounded-full bg-white dark:bg-zinc-900 p-1 border border-zinc-200 dark:border-zinc-800" />
           <div className="font-semibold text-lg">Unyt</div>
         </div>
       </SidebarHeader>

@@ -15,7 +15,7 @@ export function LandingHero({ onLogin, onSignup }: { onLogin?: () => void; onSig
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, ease: "easeOut" }}
-            className="text-4xl md:text-6xl font-extrabold text-center md:text-left bg-gradient-to-br from-primary to-blue-600 bg-clip-text text-transparent drop-shadow-lg"
+            className="text-4xl md:text-6xl font-extrabold bg-gradient-to-br from-primary to-blue-600 bg-clip-text text-transparent drop-shadow-lg"
           >
             Unyt
           </motion.h1>

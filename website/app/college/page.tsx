@@ -155,11 +155,23 @@ const polls = []
 export default function CollegePage() {
   const { userData, loading: profileLoading, error: profileError } = useUserProfile();
   const [pollsRefreshKey, setPollsRefreshKey] = useState(0);
-  const collegeId = userData?.collegeId || userData?.college || "NIT_Trichy"; // fallback for demo
+  const collegeId = userData?.collegeId || userData?.college || "NIT_Trichy";
+
   const { events, loading: eventsLoading, error: eventsError } = useFirestoreEvents(collegeId);
   const { bulletins, loading: bulletinsLoading, error: bulletinsError } = useFirestoreBulletins(collegeId);
   const { notices, loading: noticesLoading, error: noticesError } = useFirestoreNotices(collegeId);
   const { polls, loading: pollsLoading, error: pollsError } = useFirestorePolls(collegeId, pollsRefreshKey);
+
+  if (profileLoading) {
+    return <div className="p-10 text-center">Loading user profile…</div>;
+  }
+  if (profileError) {
+    return <div className="p-10 text-center text-red-500">Error loading user profile: {profileError}</div>;
+  }
+  if (!collegeId) {
+    return <div className="p-10 text-center text-red-500">No college ID found in user profile.<br/>userData: {JSON.stringify(userData)}</div>;
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       <header className="flex h-16 items-center gap-4 border-b bg-background px-6">

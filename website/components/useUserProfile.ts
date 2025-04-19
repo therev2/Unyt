@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { getDoc, doc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 export interface UserProfile {
   uid?: string;
@@ -42,13 +44,18 @@ export function useUserProfile(refreshKey = 0) {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
-          const res = await fetch(`/api/profile?uid=${user.uid}`);
-          if (!res.ok) throw new Error("Failed to fetch profile");
-          const data = await res.json();
-          setUserData({ ...data, uid: user.uid });
-        } catch (e: any) {
-          setError(e.message || "Failed to load profile");
+          const userDoc = await getDoc(doc(db, "Students", user.uid));
+          if (userDoc.exists()) {
+            setUserData({ uid: user.uid, ...userDoc.data() });
+          } else {
+            setUserData({ uid: user.uid, email: user.email });
+          }
+        } catch (err: any) {
+          setError(err?.message || "Failed to fetch user profile");
+          setUserData({ uid: user.uid, email: user.email });
         }
+      } else {
+        setUserData(null);
       }
       setLoading(false);
     });

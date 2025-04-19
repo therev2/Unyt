@@ -87,12 +87,17 @@ const featureNavItems: NavItem[] = [
   {
     title: "Leaderboards",
     href: "/leaderboards",
-    icon: Award,
+    icon: Trophy,
   },
   {
     title: "Ask Buddy",
     href: "/chatbot",
     icon: Sparkles,
+  },
+  {
+    title: "Learn with AI",
+    href: "/learn-ai",
+    icon: Award,
   },
 ]
 

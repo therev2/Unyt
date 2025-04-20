@@ -1,5 +1,7 @@
 # 📱 Unyt – Bridging Colleges, Building Communities
-
+<div style="position: absolute; top: 0; right: 0;">
+  <img src="Github/badge.png" alt="Badge" width="80" />
+</div>
 A unified app-ecosystem for inter-college collaboration, announcements, events, quizzes, and more. Built using Flutter (Mobile) and Next.js (Web) with Firebase as the backend.
 
 ---

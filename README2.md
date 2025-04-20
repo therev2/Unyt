@@ -40,14 +40,8 @@ Unyt is a cross-platform platform aiming to connect college students through a c
 
 ## 🗃️ Database Schema
 
-<details>
-<summary>Click to Expand</summary>
-
 ### 🔸 Firebase Firestore Schema
 <img src="https://your-domain.com/diagrams/firestore-schema.png" width="800"/>
-
-### 🔸 Realtime Usage Example
-<img src="https://your-domain.com/diagrams/firebase-usage-flow.png" width="800"/>
 
 ### 🔸 Entity-Relationship Diagram (ERD)
 ```mermaid
@@ -103,12 +97,6 @@ erDiagram
 
 ## 🏗️ Architecture
 
-<details>
-<summary>Click to Expand</summary>
-
-### 🔸 System Design Diagram
-<img src="https://your-domain.com/diagrams/system-architecture.png" width="800"/>
-
 ### 🔸 Tech Flow
 - Mobile and Web apps interact with Firebase (Auth, Firestore, Storage)
 - Cloud Functions for background operations
@@ -128,11 +116,52 @@ graph TD
     G -->|Triggers| B
 
     D --> H[Colleges]
-    D --> I[Global Feed]
-    D --> J[Events]
-    D --> K[Discussions]
+    D --> I[Students]
+    D --> J[Global Feed]
+    D --> K[Events]
+    D --> L[Discussions]
+
+    H --> M[Bulletin]
+    H --> N[Messages]
+    H --> O[Polls]
 ```
 </details>
+
+---
+
+## 🧠 AI Workflows
+
+### 🤖 Chatbot Assistant
+
+```mermaid
+graph TD
+    U[User Message] --> I[Firebase]
+    I --> C[Context Handler]
+    C --> Q[Query Generator]
+    Q --> R[Response From API]
+    R --> U2[Reply to User]
+```
+
+### 🧠 Quiz Generator
+
+```mermaid
+graph TD
+    A[Admin Uploads Material] --> B[LLM Parser + Summarizer]
+    B --> C[Question Bank Generator]
+    C --> D[Firestore Quiz Collection]
+    D --> E[Quiz Module Rendered in App]
+```
+
+### 📚 AI Learning Hub
+
+```mermaid
+graph TD
+    S[User selects topic] --> T[LLM-Powered Julep Agent]
+    T --> U[Fetch Concepts + Examples via Actions]
+    U --> V[10 s Timeout before Native Gemini API]
+    V --> W[Response Returned]
+    W --> X[Formaat as Interactive Flashcards/Learning Methods + Explanations]
+```
 
 ---
 
@@ -143,7 +172,6 @@ graph TD
 | Mobile App    | Flutter, Dart                   |
 | Web Portal    | Next.js, Tailwind CSS, Vercel   |
 | Backend       | Firebase Auth, Firestore        |
-| Deployment    | Vercel (Web), Google Play (App) |
 
 ---
 
@@ -154,5 +182,12 @@ graph TD
 cd app
 flutter pub get
 flutter run
+```
+
+### 🔧 Web App (TypeScript)
+```bash
+cd website
+pnpm i
+pnpm run dev
 ```
 

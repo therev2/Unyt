@@ -38,6 +38,7 @@ interface UserProfile {
     discussionsCreated?: number;
     badges?: number;
   };
+  registeredEvents?: string[];
 }
 
 function useUserProfile(refreshKey = 0) {
@@ -130,11 +131,86 @@ const badges = [
   },
 ]
 
+import { db } from "@/lib/firebase";
+import { collection, getDocs } from "firebase/firestore";
+
 export default function ProfilePage() {
   const [profileRefreshKey, setProfileRefreshKey] = useState(0);
   const { userData, loading, error } = useUserProfile(profileRefreshKey);
 
-  if (loading) {
+  const [events, setEvents] = useState<any[]>([]);
+const [loadingEvents, setLoadingEvents] = useState(true);
+
+// Fetch all events from Firestore
+useEffect(() => {
+  async function fetchEvents() {
+    try {
+      const querySnapshot = await getDocs(collection(db, "GlobalEvents"));
+      const fetchedEvents: any[] = [];
+      querySnapshot.forEach((doc) => {
+        fetchedEvents.push({ id: doc.id, ...doc.data() });
+      });
+      setEvents(fetchedEvents);
+    } catch (error) {
+      setEvents([]);
+    } finally {
+      setLoadingEvents(false);
+    }
+  }
+  fetchEvents();
+}, []);
+
+// Filter events: user registered + upcoming
+const now = new Date();
+console.log('Now:', now);
+const registeredEventIds = (userData && (userData as any).registeredEvents) || [];
+console.log('Registered Event IDs:', registeredEventIds);
+console.log('All event IDs:', events.map(e => e.id));
+const upcomingRegisteredEvents = events.filter(event => {
+  const isRegistered = registeredEventIds.includes(event.id);
+  console.log('Checking event:', event.id, '| eventdates:', event.eventdates, '| datetime:', event.datetime);
+  let eventDate;
+let eventdatesDate;
+
+if (event.eventdates) {
+  const rangeMatch = event.eventdates.match(/(\w+) (\d{1,2})-(\d{1,2}), (\d{4})/);
+  if (rangeMatch) {
+    const month = rangeMatch[1];
+    const startDay = rangeMatch[2];
+    const year = rangeMatch[4];
+    eventdatesDate = new Date(`${month} ${startDay}, ${year}`);
+    console.log('Parsed range eventDate:', eventdatesDate);
+  } else {
+    const singleMatch = event.eventdates.match(/(\w+) (\d{1,2}), (\d{4})/);
+    if (singleMatch) {
+      const month = singleMatch[1];
+      const day = singleMatch[2];
+      const year = singleMatch[3];
+      eventdatesDate = new Date(`${month} ${day}, ${year}`);
+      console.log('Parsed single eventDate:', eventdatesDate);
+    }
+  }
+}
+
+if (event.datetime && typeof event.datetime.toDate === "function") {
+  eventDate = event.datetime.toDate();
+  console.log('Converted Firestore Timestamp to JS Date:', eventDate);
+} else if (event.datetime) {
+  eventDate = new Date(event.datetime);
+  console.log('Converted string/number to JS Date:', eventDate);
+}
+
+// Prefer eventdatesDate if present, otherwise fallback to eventDate
+const finalEventDate = eventdatesDate || eventDate;
+const isUpcoming = finalEventDate && finalEventDate >= now;
+if (isRegistered) {
+  console.log('Event is registered:', event.id, '| Computed eventDate:', finalEventDate, '| isUpcoming:', isUpcoming, '| now:', now);
+}
+return isRegistered && isUpcoming;
+});
+console.log('Matched upcoming registered events:', upcomingRegisteredEvents.map(e => e.id));
+
+if (loading) {
     return (
       <div className="flex flex-col min-h-screen items-center justify-center">
         <span className="text-lg">Loading profile...</span>
@@ -150,7 +226,7 @@ export default function ProfilePage() {
     );
   }
 
-  if (!userData) {
+if (!userData) {
     return (
       <div className="flex flex-col min-h-screen items-center justify-center">
         <span className="text-lg">No profile data found.</span>
@@ -319,28 +395,30 @@ export default function ProfilePage() {
                     <Card>
                       <CardHeader>
                         <CardTitle>Upcoming Events</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          <div className="flex items-center gap-4 rounded-lg border p-4">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                              <Calendar className="h-6 w-6 text-primary" />
-                            </div>
-                            <div>
-                              <p className="font-medium">National Hackathon 2023</p>
-                              <p className="text-sm text-muted-foreground">May 20-22, 2023 • IIT Delhi</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-4 rounded-lg border p-4">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                              <Calendar className="h-6 w-6 text-primary" />
-                            </div>
-                            <div>
-                              <p className="font-medium">Debate Championship</p>
-                              <p className="text-sm text-muted-foreground">June 10, 2023 • Delhi University</p>
-                            </div>
-                          </div>
-                        </div>
+</CardHeader>
+<CardContent>
+  <div className="space-y-4">
+    {loadingEvents ? (
+      <div className="text-center text-muted-foreground">Loading events...</div>
+    ) : upcomingRegisteredEvents.length === 0 ? (
+      <div className="text-center text-muted-foreground">No upcoming events found.</div>
+    ) : (
+      upcomingRegisteredEvents.map(event => (
+        <div key={event.id} className="flex items-center gap-4 rounded-lg border p-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+            <Calendar className="h-6 w-6 text-primary" />
+          </div>
+          <div>
+            <p className="font-medium">{event.title || event.name}</p>
+            <p className="text-sm text-muted-foreground">
+              {event.eventdates || event.datetime || "Date not set"}
+              {event.collegename ? ` • ${event.collegename}` : event.location ? ` • ${event.location}` : ""}
+            </p>
+          </div>
+        </div>
+      ))
+    )}
+  </div>
                       </CardContent>
                       <CardFooter>
                         <Button variant="outline" className="w-full">

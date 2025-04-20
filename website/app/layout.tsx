@@ -10,7 +10,12 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Unyt",
   description: "Bridging Colleges, Building Communities", // updated for Unyt
-  generator: 'v0.dev'
+  generator: 'v0.dev',
+  icons: {
+    icon: "/unyt-logo.svg",
+    shortcut: "/unyt-logo.svg",
+    apple: "/unyt-logo.svg"
+  }
 }
 
 export default function RootLayout({

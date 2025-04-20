@@ -24,7 +24,7 @@
 
 </div>
 
-*Placeholders for mobile and desktop UI screenshots. Replace with real images when available.*
+*Mobile and desktop UI screenshots.*
 
 ---
 

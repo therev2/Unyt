@@ -6,6 +6,8 @@
 
 ### Bridging Colleges, Building Communities
 
+## Overview
+Unyt is a cross-platform ecosystem designed to connect students, colleges, and communities. It features a mobile app (Flutter) and a modern web portal (Next.js + Tailwind CSS) that together offer a unified experience for campus life, events, forums, quizzes, leaderboards, and more.
 ---
 
 ## UI Images & Showcase
@@ -27,9 +29,6 @@
 *Mobile and desktop UI screenshots.*
 
 ---
-
-## Overview
-Unyt is a cross-platform ecosystem designed to connect students, colleges, and communities. It features a mobile app (Flutter) and a modern web portal (Next.js + Tailwind CSS) that together offer a unified experience for campus life, events, forums, quizzes, leaderboards, and more.
 
 ## Features
 

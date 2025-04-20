@@ -1,0 +1,155 @@
+# 📱 Unyt – Bridging Colleges, Building Communities
+
+A unified app-ecosystem for inter-college collaboration, announcements, events, quizzes, and more. Built using Flutter (Mobile) and Next.js (Web) with Firebase as the backend.
+
+---
+
+## 🧽 Table of Contents
+- [🚀 Overview](#-overview)
+- [📸 UI & Visuals](#-ui--visuals)
+- [🗃️ Database Schema](#️-database-schema)
+- [🏗️ Architecture](#️-architecture)
+- [🧰 Tech Stack](#-tech-stack)
+- [📦 Setup](#-setup)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
+
+---
+
+## 🚀 Overview
+
+Unyt is a cross-platform platform aiming to connect college students through a centralized app and web system. With personalized homepages, discussion forums, quiz battles, and a leaderboard system, Unyt enhances student collaboration beyond campus boundaries.
+
+---
+
+## 📸 UI & Visuals
+
+### 🔹 Web Interface
+<img src="https://your-domain.com/screenshots/web-home.png" width="700"/>
+
+### 🔹 Mobile App (Flutter)
+<p float="left">
+  <img src="https://your-domain.com/screenshots/mobile-home.png" width="250"/>
+  <img src="https://your-domain.com/screenshots/mobile-event.png" width="250"/>
+  <img src="https://your-domain.com/screenshots/mobile-quiz.png" width="250"/>
+</p>
+
+---
+
+## 🗃️ Database Schema
+
+<details>
+<summary>Click to Expand</summary>
+
+### 🔸 Firebase Firestore Schema
+<img src="https://your-domain.com/diagrams/firestore-schema.png" width="800"/>
+
+### 🔸 Realtime Usage Example
+<img src="https://your-domain.com/diagrams/firebase-usage-flow.png" width="800"/>
+
+### 🔸 Entity-Relationship Diagram (ERD)
+```mermaid
+erDiagram
+    College ||--o{ Event : hosts
+    College ||--o{ User : enrolls
+    Event ||--o{ Registration : has
+    User ||--o{ Registration : makes
+    Event ||--o{ Quiz : features
+    Quiz ||--o{ Question : contains
+    User ||--o{ Discussion : starts
+    Event ||--o{ Discussion : includes
+
+    College {
+        string name
+        string domain
+    }
+    User {
+        string uid
+        string name
+        string email
+        string role
+    }
+    Event {
+        string id
+        string title
+        datetime startTime
+        datetime endTime
+    }
+    Registration {
+        string userId
+        string eventId
+        timestamp registeredAt
+    }
+    Quiz {
+        string quizId
+        string title
+    }
+    Question {
+        string questionId
+        string content
+        string correctAnswer
+    }
+    Discussion {
+        string threadId
+        string content
+        timestamp postedAt
+    }
+```
+</details>
+
+---
+
+## 🏗️ Architecture
+
+<details>
+<summary>Click to Expand</summary>
+
+### 🔸 System Design Diagram
+<img src="https://your-domain.com/diagrams/system-architecture.png" width="800"/>
+
+### 🔸 Tech Flow
+- Mobile and Web apps interact with Firebase (Auth, Firestore, Storage)
+- Cloud Functions for background operations
+- Firestore triggers for event-driven features
+
+### 📊 Mermaid Architecture Diagram
+```mermaid
+graph TD
+    A[Flutter Mobile App] --> B(Firebase)
+    C[Next.js Web Portal] --> B
+
+    B --> D[Firestore DB]
+    B --> E[Authentication]
+    B --> F[Storage]
+
+    B --> G[Cloud Functions]
+    G -->|Triggers| B
+
+    D --> H[Colleges]
+    D --> I[Events]
+    D --> J[Discussions]
+```
+</details>
+
+---
+
+## 🧰 Tech Stack
+
+| Platform      | Tools & Frameworks              |
+|---------------|---------------------------------|
+| Mobile App    | Flutter, Dart                   |
+| Web Portal    | Next.js, Tailwind CSS, Vercel   |
+| Backend       | Firebase Auth, Firestore        |
+| Deployment    | Vercel (Web), Google Play (App) |
+
+---
+
+## 📦 Setup
+
+### 🔧 Mobile App (Flutter)
+```bash
+cd app
+flutter pub get
+flutter run
+```
+

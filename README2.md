@@ -27,13 +27,13 @@ Unyt is a cross-platform platform aiming to connect college students through a c
 ## 📸 UI & Visuals
 
 ### 🔹 Web Interface
-<img src="https://your-domain.com/screenshots/web-home.png" width="700"/>
+<img src="./Github/Screenshot_20-4-2025_65138_localhost.jpeg" alt="Website Desktop UI" width="540" style="margin-top: 24px;"/>
 
 ### 🔹 Mobile App (Flutter)
 <p float="left">
-  <img src="https://your-domain.com/screenshots/mobile-home.png" width="250"/>
-  <img src="https://your-domain.com/screenshots/mobile-event.png" width="250"/>
-  <img src="https://your-domain.com/screenshots/mobile-quiz.png" width="250"/>
+<img src="./Github/WhatsApp Image 2025-04-20 at 6.31.26 AM.jpeg" alt="Mobile UI 1" width="180" style="margin: 0 8px;"/>
+<img src="./Github/WhatsApp Image 2025-04-20 at 6.41.49 AM (1).jpeg" alt="Mobile UI 2" width="180" style="margin: 0 8px;"/>
+<img src="./Github/WhatsApp Image 2025-04-20 at 6.41.49 AM.jpeg" alt="Mobile UI 3" width="180" style="margin: 0 8px;"/>
 </p>
 
 ---

@@ -7,6 +7,7 @@ A unified app-ecosystem for inter-college collaboration, announcements, events, 
 ---
 ## 📹 Demo Video
 [Demo Video](https://youtu.be/ECsMwjBcfP8?si=J7YJOLSgtgllj8uL)
+[![Watch the video](https://youtu.be/ECsMwjBcfP8?si=J7YJOLSgtgllj8uL) 
 
 ## Presentation
 [Unyt Presentation](https://drive.google.com/drive/folders/1MBxVWiNqDM66BjjmyKTZvjNiYWHc89Cj?usp=sharing)

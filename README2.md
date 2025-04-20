@@ -128,8 +128,9 @@ graph TD
     G -->|Triggers| B
 
     D --> H[Colleges]
-    D --> I[Events]
-    D --> J[Discussions]
+    D --> I[Global Feed]
+    D --> J[Events]
+    D --> K[Discussions]
 ```
 </details>
 

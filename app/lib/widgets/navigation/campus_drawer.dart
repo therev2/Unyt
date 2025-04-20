@@ -130,6 +130,14 @@ class CampusDrawer extends StatelessWidget {
               );
             },
           ),
+          ListTile(
+            leading: Icon(Icons.psychology, color: Theme.of(context).colorScheme.primary),
+            title: Text('Learn with AI'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.of(context).pushNamed('/learn-ai');
+            },
+          ),
           const Divider(),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),

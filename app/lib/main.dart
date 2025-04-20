@@ -7,6 +7,13 @@ import 'package:unyt/screens/main_screen.dart';
 import 'package:unyt/utils/theme_utils.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'screens/learn_ai/learn_ai_hub_screen.dart';
+import 'screens/learn_ai/cloze_test_screen.dart';
+import 'screens/learn_ai/dialogic_mode_screen.dart';
+import 'screens/learn_ai/flashcards_screen.dart';
+import 'screens/learn_ai/socratic_questioning_screen.dart';
+import 'screens/learn_ai/story_based_learning_screen.dart';
+import 'screens/learn_ai/visual_learning_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,6 +51,13 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => const LoginScreen(),
         '/main': (context) => const MainScreen(),
+        '/learn-ai': (context) => const LearnAIHubScreen(),
+        '/learn-ai/cloze-test': (context) => const ClozeTestScreen(),
+        '/learn-ai/dialogic-mode': (context) => const DialogicModeScreen(),
+        '/learn-ai/flashcards': (context) => const FlashcardsScreen(),
+        '/learn-ai/socratic-questioning': (context) => const SocraticQuestioningScreen(),
+        '/learn-ai/story-based-learning': (context) => const StoryBasedLearningScreen(),
+        '/learn-ai/visual-learning': (context) => const VisualLearningScreen(),
       },
     );
   }

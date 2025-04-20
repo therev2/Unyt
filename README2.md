@@ -38,6 +38,27 @@ Unyt is a cross-platform platform aiming to connect college students through a c
 
 ---
 
+## Features
+
+### 📱 Mobile App (Flutter)
+- College-specific home, global feed, and event discovery
+- Forums and discussions for student engagement
+- Quizzes and battles for learning and competition
+- Leaderboards for colleges, students, and quizzes
+- Profile management and achievements
+- Notifications, analytics, and Firebase integration
+
+### 🌐 Website (Next.js)
+- Landing page and onboarding
+- College dashboard: bulletins, events, notices
+- Forums and topic discussions
+- Quiz and battle rooms
+- Leaderboards and achievements
+- Profile and settings management
+- Modern, responsive UI with Tailwind CSS
+
+--- 
+
 ## 🗃️ Database Schema
 
 ### 🔸 Firebase Firestore Schema
@@ -167,11 +188,11 @@ graph TD
 
 ## 🧰 Tech Stack
 
-| Platform      | Tools & Frameworks              |
-|---------------|---------------------------------|
-| Mobile App    | Flutter, Dart                   |
-| Web Portal    | Next.js, Tailwind CSS, Vercel   |
-| Backend       | Firebase Auth, Firestore        |
+| Platform      | Tools & Frameworks                           |
+|---------------|----------------------------------------------|
+| Mobile App    | Flutter, Dart, Provider etc                  |
+| Web Portal    | TypeScript, Next.js, Tailwind CSS, Vercel    |
+| Backend       | Firebase Auth, Firestore                     |
 
 ---
 
@@ -190,4 +211,13 @@ cd website
 pnpm i
 pnpm run dev
 ```
+
+---
+
+## Contributing
+Contributions are welcome! Please open issues and pull requests for improvements, bugfixes, or new features.
+
+## Authors & Credits
+Team Phoenix
+Members - Shanu Kumawat, Revan Channa, Samudraneel Sarkar, Suyash Jain
 

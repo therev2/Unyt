@@ -13,7 +13,7 @@
 <div align="center">
 
 <!-- Mobile UI images (side by side) -->
-<img src="./Github/Whatsapp-image-2025-04-20-063126.jpeg" alt="Mobile UI 1" width="180" style="margin: 0 8px;"/>
+<img src="./Github/WhatsApp Image 2025-04-20 at 6.31.26 AM.jpeg" alt="Mobile UI 1" width="180" style="margin: 0 8px;"/>
 <img src="./Github/WhatsApp Image 2025-04-20 at 6.41.49 AM (1).jpeg" alt="Mobile UI 2" width="180" style="margin: 0 8px;"/>
 <img src="./Github/WhatsApp Image 2025-04-20 at 6.41.49 AM.jpeg" alt="Mobile UI 3" width="180" style="margin: 0 8px;"/>
 

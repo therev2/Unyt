@@ -48,11 +48,11 @@ export function useUserProfile(refreshKey = 0) {
           if (userDoc.exists()) {
             setUserData({ uid: user.uid, ...userDoc.data() });
           } else {
-            setUserData({ uid: user.uid, email: user.email });
+            setUserData({ uid: user.uid, email: user.email ?? undefined });
           }
         } catch (err: any) {
           setError(err?.message || "Failed to fetch user profile");
-          setUserData({ uid: user.uid, email: user.email });
+          setUserData({ uid: user.uid, email: user.email ?? undefined });
         }
       } else {
         setUserData(null);

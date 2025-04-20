@@ -1,14 +1,69 @@
-import { Bell, Key, Shield, User } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { SidebarTrigger } from "@/components/ui/sidebar"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Textarea } from "@/components/ui/textarea"
+"use client";
+
+import { Bell, Key, Shield, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { useEffect, useState, ChangeEvent } from "react";
+import { db, auth } from "@/lib/firebase";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
 
 export default function SettingsPage() {
+  const [user, setUser] = useState<FirebaseUser | null>(null);
+  const [profile, setProfile] = useState({ name: "", email: "", bio: "", avatar: "" });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        setUser(firebaseUser);
+        const docRef = doc(db, "Students", firebaseUser.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setProfile({
+            name: data.name || "",
+            email: data.email || firebaseUser.email || "",
+            bio: data.bio || "",
+            avatar: data.avatar || ""
+          });
+        } else {
+          setProfile({
+            name: firebaseUser.displayName || "",
+            email: firebaseUser.email || "",
+            bio: "",
+            avatar: firebaseUser.photoURL || ""
+          });
+        }
+        setLoading(false);
+      } else {
+        setUser(null);
+        setLoading(false);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setProfile({ ...profile, [e.target.id]: e.target.value });
+
+  const handleSave = async () => {
+    if (!user) return;
+    setSaving(true);
+    const docRef = doc(db, "Students", user.uid);
+    await updateDoc(docRef, { name: profile.name, bio: profile.bio });
+    setSaving(false);
+    alert("Profile updated!");
+  };
+
+  if (loading) return <div className="p-10 text-center">Loading...</div>;
+
   return (
     <div className="flex flex-col min-h-screen">
       <header className="flex h-16 items-center gap-4 border-b bg-background px-6">
@@ -61,17 +116,10 @@ export default function SettingsPage() {
                           </div>
                           <div className="sm:w-2/3 flex items-center gap-4">
                             <Avatar className="h-16 w-16">
-                              <AvatarImage src="/placeholder.svg?height=64&width=64" alt="Profile" />
-                              <AvatarFallback>AJ</AvatarFallback>
+                              <AvatarImage src={profile.avatar || "/placeholder.svg?height=64&width=64"} alt="Profile" />
+                              <AvatarFallback>{profile.name ? profile.name.split(" ").map(n => n[0]).join("") : "U"}</AvatarFallback>
                             </Avatar>
-                            <div className="flex flex-col gap-2">
-                              <Button variant="outline" size="sm">
-                                Change
-                              </Button>
-                              <Button variant="ghost" size="sm">
-                                Remove
-                              </Button>
-                            </div>
+                            {/* Avatar upload/change can be implemented here */}
                           </div>
                         </div>
 
@@ -80,7 +128,7 @@ export default function SettingsPage() {
                             <Label htmlFor="name">Full Name</Label>
                           </div>
                           <div className="sm:w-2/3">
-                            <Input id="name" defaultValue="Alex Johnson" />
+                            <Input id="name" value={profile.name} onChange={handleChange} />
                           </div>
                         </div>
 
@@ -89,7 +137,7 @@ export default function SettingsPage() {
                             <Label htmlFor="email">Email</Label>
                           </div>
                           <div className="sm:w-2/3">
-                            <Input id="email" defaultValue="alex@nit.edu.in" />
+                            <Input id="email" value={profile.email} disabled />
                           </div>
                         </div>
 
@@ -100,10 +148,16 @@ export default function SettingsPage() {
                           <div className="sm:w-2/3">
                             <Textarea
                               id="bio"
-                              defaultValue="Student at NIT Trichy. Passionate about AI and hackathons."
+                              value={profile.bio}
+                              onChange={handleChange}
                               rows={3}
                             />
                           </div>
+                        </div>
+                        <div className="flex justify-end">
+                          <Button onClick={handleSave} disabled={saving}>
+                            {saving ? "Saving..." : "Save Changes"}
+                          </Button>
                         </div>
                       </div>
                     </CardContent>
@@ -115,5 +169,5 @@ export default function SettingsPage() {
         </div>
       </main>
     </div>
-  )
+  );
 }

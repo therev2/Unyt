@@ -40,7 +40,6 @@ export default function LoginPage() {
           transition={{ duration: 0.7, ease: 'easeOut' }}
           className="flex flex-col items-center mb-8"
         >
-          <img src="/logo-unyt.svg" alt="Unyt Logo" className="h-16 w-16 mb-4" />
           <span className="text-3xl font-bold tracking-tight text-[#6366f1]">Unyt</span>
           <span className="mt-2 text-base text-gray-300">Connect with your campus community</span>
         </motion.div>
@@ -53,7 +52,7 @@ export default function LoginPage() {
             <form className="flex flex-col gap-5" onSubmit={handleLogin}>
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M16 12A4 4 0 118 12a4 4 0 018 0zM12 14v2m0 4h.01' /></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5"><path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5A2.25 2.25 0 0 1 19.5 19.5H4.5a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5H4.5a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-.659 1.591l-7.09 7.09a2.25 2.25 0 0 1-3.182 0l-7.09-7.09A2.25 2.25 0 0 1 2.25 6.993V6.75"/></svg>
               </span>
               <Input
                 type="email"
@@ -67,7 +66,7 @@ export default function LoginPage() {
             </div>
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 15v2m0 0a4 4 0 01-4-4h8a4 4 0 01-4 4zm0 0v-2m-6 4h12' /></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5"><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V7.5a4.5 4.5 0 0 0-9 0v3m-1.5 0A1.5 1.5 0 0 0 4.5 12v7.5A1.5 1.5 0 0 0 6 21h12a1.5 1.5 0 0 0 1.5-1.5V12a1.5 1.5 0 0 0-1.5-1.5m-13.5 0h15"/></svg>
               </span>
               <Input
                 type={showPassword ? "text" : "password"}
@@ -85,9 +84,9 @@ export default function LoginPage() {
                 aria-label="Show password"
               >
                 {showPassword ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-10-4.477-10-10a9.96 9.96 0 012.382-6.625M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12S5.25 6.75 12 6.75 21.75 12 21.75 12s-3 5.25-9.75 5.25S2.25 12 2.25 12z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                 ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm2.25 5.625A9.956 9.956 0 0012 19c-5.523 0-10-4.477-10-10a9.96 9.96 0 012.382-6.625" /></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5"><path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 2.25 12c0 .943.217 1.84.604 2.647m2.007 3.1A10.45 10.45 0 0 0 12 17.25c3.978 0 7.428-2.227 9.146-5.25a10.46 10.46 0 0 0-4.03-4.522M15 12a3 3 0 11-6 0 3 3 0 016 0zm-7.362 7.362L20.485 4.515" /></svg>
                 )}
               </button>
             </div>
@@ -102,37 +101,39 @@ export default function LoginPage() {
               <div className="flex-1 h-px bg-border" />
             </div>
             <button
-  type="button"
-  className="w-full h-12 flex items-center justify-center gap-2 rounded-lg bg-white text-border font-semibold border border-border hover:bg-gray-100 transition"
-  onClick={async () => {
-    setError("");
-    try {
-      const { getAuth, GoogleAuthProvider, signInWithPopup } = await import("firebase/auth");
-      const { auth, db } = await import("@/lib/firebase");
-      const { doc, getDoc, setDoc } = await import("firebase/firestore");
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      // Check if user exists in Firestore
-      const studentRef = doc(db, "Students", user.uid);
-      const studentSnap = await getDoc(studentRef);
-      if (!studentSnap.exists()) {
-        await setDoc(studentRef, {
-          uid: user.uid,
-          name: user.displayName || "",
-          email: user.email || "",
-          photoURL: user.photoURL || ""
-        });
-      }
-      router.push("/college");
-    } catch (err: any) {
-      setError(err.message || "Google sign-in failed");
-    }
-  }}
->
-  <svg className="h-5 w-5" viewBox="0 0 24 24"><path fill="#EA4335" d="M21.35 11.1h-9.18v2.92h5.26c-.23 1.25-1.45 3.67-5.26 3.67-3.17 0-5.76-2.62-5.76-5.84s2.59-5.84 5.76-5.84c1.81 0 3.03.77 3.73 1.43l2.55-2.48C16.36 3.3 14.4 2.3 12 2.3 6.48 2.3 2 6.7 2 12.1s4.48 9.8 10 9.8c5.16 0 9.18-3.77 9.18-9.1 0-.62-.07-1.09-.16-1.6z"/><path fill="#34A853" d="M3.54 7.76l2.52 1.85C7.13 7.15 9.36 5.7 12 5.7c1.81 0 3.03.77 3.73 1.43l2.55-2.48C16.36 3.3 14.4 2.3 12 2.3c-3.9 0-7.1 2.84-8.46 6.46z"/><path fill="#4A90E2" d="M12 21.9c2.4 0 4.36-.8 5.8-2.16l-2.67-2.18c-.74.52-1.7.92-3.13.92-2.42 0-4.47-1.6-5.19-3.77l-2.52 1.95C4.9 20.16 8.18 21.9 12 21.9z"/><path fill="#FBBC05" d="M21.35 11.1h-9.18v2.92h5.26c-.23 1.25-1.45 3.67-5.26 3.67-3.17 0-5.76-2.62-5.76-5.84s2.59-5.84 5.76-5.84c1.81 0 3.03.77 3.73 1.43l2.55-2.48C16.36 3.3 14.4 2.3 12 2.3 6.48 2.3 2 6.7 2 12.1s4.48 9.8 10 9.8c5.16 0 9.18-3.77 9.18-9.1 0-.62-.07-1.09-.16-1.6z"/></svg>
-  Continue with Google
-</button>
+              type="button"
+              className="w-full h-12 flex items-center justify-center gap-2 rounded-lg font-semibold border border-border transition
+                bg-[#23272f] hover:bg-[#16191f] text-white shadow-md"
+              style={{ boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)' }}
+              onClick={async () => {
+                setError("");
+                try {
+                  const { getAuth, GoogleAuthProvider, signInWithPopup } = await import("firebase/auth");
+                  const { auth, db } = await import("@/lib/firebase");
+                  const { doc, getDoc, setDoc } = await import("firebase/firestore");
+                  const provider = new GoogleAuthProvider();
+                  const result = await signInWithPopup(auth, provider);
+                  const user = result.user;
+                  // Check if user exists in Firestore
+                  const studentRef = doc(db, "Students", user.uid);
+                  const studentSnap = await getDoc(studentRef);
+                  if (!studentSnap.exists()) {
+                    await setDoc(studentRef, {
+                      uid: user.uid,
+                      name: user.displayName || "",
+                      email: user.email || "",
+                      photoURL: user.photoURL || ""
+                    });
+                  }
+                  router.push("/college");
+                } catch (err: any) {
+                  setError(err.message || "Google sign-in failed");
+                }
+              }}
+            >
+              <svg className="h-5 w-5" viewBox="0 0 24 24"><g><path fill="#4285F4" d="M21.805 10.023h-9.765v3.955h5.59c-.241 1.244-1.458 3.649-5.59 3.649-3.367 0-6.102-2.785-6.102-6.15 0-3.366 2.735-6.15 6.102-6.15 1.922 0 3.216.819 3.958 1.527l2.701-2.633C17.187 2.86 14.779 1.7 12 1.7c-5.06 0-9.18 4.12-9.18 9.2 0 5.08 4.12 9.2 9.18 9.2 5.08 0 8.44-3.57 8.44-8.6 0-.58-.063-1.02-.145-1.477z"/><path fill="#34A853" d="M3.545 7.68l2.701 1.982C7.3 7.14 9.47 5.7 12 5.7c1.922 0 3.216.819 3.958 1.527l2.701-2.633C17.187 2.86 14.779 1.7 12 1.7c-3.91 0-7.17 2.76-8.455 6.68z"/><path fill="#FBBC05" d="M12 21.9c2.779 0 5.187-.92 7.078-2.5l-2.928-2.277c-.788.527-1.797.918-3.15.918-2.44 0-4.507-1.65-5.23-3.867l-2.725 2.098C4.83 20.22 8.09 21.9 12 21.9z"/><path fill="#EA4335" d="M21.805 10.023h-9.765v3.955h5.59c-.241 1.244-1.458 3.649-5.59 3.649-3.367 0-6.102-2.785-6.102-6.15 0-3.366 2.735-6.15 6.102-6.15 1.922 0 3.216.819 3.958 1.527l2.701-2.633C17.187 2.86 14.779 1.7 12 1.7c-5.06 0-9.18 4.12-9.18 9.2 0 5.08 4.12 9.2 9.18 9.2 5.08 0 8.44-3.57 8.44-8.6 0-.58-.063-1.02-.145-1.477z"/></g></svg>
+              Continue with Google
+            </button>
             
           </form>
           <div className="mt-6 text-center text-sm text-gray-400">
